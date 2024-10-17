@@ -3,6 +3,8 @@ from SignUp import SignUp
 import createuser
 import mysql.connector
 import bcrypt
+import subprocess
+from dashboard import Dashboard
 
 
 class SignIn(CTk):
@@ -106,7 +108,10 @@ class SignIn(CTk):
         if result:
             hashed_password = result[0]
             if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
-                self.update_console("You logged in successfully")
+                # Open the dashboard and pass the username
+                self.destroy()
+                dashboard = Dashboard(username)
+                dashboard.mainloop()
             else:
                 self.update_console("Incorrect password.")
         else:
