@@ -1,15 +1,13 @@
 from customtkinter import *
-import mysql.connector
+import sqlite3
 import bcrypt  # Make sure to install bcrypt: pip install bcrypt
 import createuser
 
-class SignUp(CTk):
-    def __init__(self):
-        super().__init__()
 
-        self.geometry("900x600")
-        self.title("Thunder")
-
+class SignUp(CTkFrame):
+    def __init__(self, main_app):
+        super().__init__(main_app.root)  # Pass the main app's root
+        self.main_app = main_app
         self.create_widgets()
 
     def create_widgets(self):
@@ -18,6 +16,7 @@ class SignUp(CTk):
         self.widget_password_section()
         self.widget_sign_up_button()
         self.widget_alternative_sign_up_button()
+        self.widget_return_to_sign_in_button()  # Ensure this button is created
 
     def widget_welcome_section(self):
         # Welcome Label
@@ -105,6 +104,13 @@ class SignUp(CTk):
         self.continue_google_button = CTkButton(master=self, text="Continue With Google", width=300, height=30)
         self.continue_google_button.place(relx=0.7, rely=0.868, anchor="center")
 
+    def widget_return_to_sign_in_button(self):
+        self.return_button = CTkButton(master=self, text="Back to Sign In", width=300, height=30, command=self.return_to_sign_in)
+        self.return_button.place(relx=0.7, rely=0.936, anchor="center")  # Adjust position as needed
+
+    def return_to_sign_in(self):
+        self.main_app.show_signin()  # Call the main app's method to show the SignIn screen
+
     def sign_up(self):
         username = self.username_entry.get()
         password = self.password_entry.get()
@@ -124,9 +130,16 @@ class SignUp(CTk):
         # Hash the password
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
-        # Call the create_user function to insert into the database
-        createuser.create_user(username, hashed_password)
+        # Convert hashed password to string
+        hashed_password_str = hashed_password.decode('utf-8')  # Convert bytes to string
 
+        # Call the create_user function to insert into the database
+        createuser.create_user(username, hashed_password_str)  # Pass the string
+
+        self.return_to_sign_in()
+
+    def hide(self):
+        self.pack_forget()  # Use pack_forget to hide the current screen
+        
 if __name__ == "__main__":
-    app = SignUp()
-    app.mainloop()
+    pass

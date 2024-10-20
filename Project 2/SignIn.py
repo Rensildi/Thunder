@@ -1,18 +1,14 @@
 from customtkinter import *
-from SignUp import SignUp
 import createuser
-import mysql.connector
+import sqlite3
 import bcrypt
 import subprocess
 from dashboard import Dashboard
 
-
-class SignIn(CTk):
-    def __init__(self):
-        super().__init__()
-        self.geometry("900x600")
-        self.title("Thunder")
-
+class SignIn(CTkFrame):
+    def __init__(self, main_app):
+        super().__init__(main_app.root)  # Pass the main app's root
+        self.main_app = main_app
         self.create_widgets()
 
     def create_widgets(self):
@@ -80,9 +76,7 @@ class SignIn(CTk):
         self.console_output.configure(text=message)
     
     def launch_signup(self):
-        self.destroy()
-        signup_app = SignUp()
-        signup_app.mainloop()
+        self.main_app.show_signup()  # Call the main app's method to show the SignUp screen
 
     def sign_in(self):
         # Implement sign-in functionality here
@@ -90,28 +84,22 @@ class SignIn(CTk):
         password = self.password_entry.get()
         
         # Connect to the database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="thunder"
-        )
-        
+        conn = sqlite3.connect('thunder.db')
         cursor = conn.cursor()
         
         # Fetch user data
-        sql = "SELECT password FROM users WHERE username = %s"
+        sql = "SELECT password FROM users WHERE username = ?"
         cursor.execute(sql, (username,))
         result = cursor.fetchone()
         
         # Check if username exists and password matches
         if result:
-            hashed_password = result[0]
-            if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
+            hashed_password = result[0]  # Already a string now
+            if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):  # Convert string to bytes for comparison
                 # Open the dashboard and pass the username
-                self.destroy()
-                dashboard = Dashboard(username)
-                dashboard.mainloop()
+                self.hide()  # Hide current frame
+                dashboard = Dashboard(self.main_app, username)  # Pass the main app and username
+                dashboard.pack(fill='both', expand=True)  # Pack the dashboard frame
             else:
                 self.update_console("Incorrect password.")
         else:
@@ -121,7 +109,8 @@ class SignIn(CTk):
         conn.close()
         print("Sign In button clicked")  # Placeholder for actual sign-in logic
 
+    def hide(self):
+        self.pack_forget()  # Use pack_forget to hide the current screen
 
 if __name__ == "__main__":
-    app = SignIn()
-    app.mainloop()
+    pass
