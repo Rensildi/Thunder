@@ -15,6 +15,14 @@ class Dashboard(CTkFrame):
         self.label.pack(pady=20)
 
         # Add additional dashboard components here if needed
+        
+        # Logout Button
+        self.logout_button = CTkButton(self,text="Logout", command=self.logout)
+        self.logout_button.pack(pady=10)
+        
+    def logout(self):
+        self.pack_forget()
+        self.main_app.show_signin()
 
 if __name__=="__main__":
     pass  # The main application will handle the instantiation

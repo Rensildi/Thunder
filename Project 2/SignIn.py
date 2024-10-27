@@ -4,12 +4,15 @@ import sqlite3
 import bcrypt
 import subprocess
 from dashboard import Dashboard
+import threading
 
 class SignIn(CTkFrame):
     def __init__(self, main_app):
         super().__init__(main_app.root)  # Pass the main app's root
         self.main_app = main_app
         self.create_widgets()
+        self.angle = 0 # For rotating circle
+        self.is_loading = False 
 
     def create_widgets(self):
         self.widget_welcome_section()
@@ -19,6 +22,10 @@ class SignIn(CTkFrame):
         self.widget_sign_up_button()
         self.widget_console_output()
         self.widget_alternative_sign_in_button()
+        
+        # Create a Canvas for the circular loading animation
+        self.canvas = CTkCanvas(self, width=30, height=30, bg="#2E2E2E", highlightthickness=0, bd=0)
+        self.canvas.place(relx=0.7, rely=0.94, anchor="center")
 
     def widget_welcome_section(self):
         # Welcome Label
@@ -76,12 +83,18 @@ class SignIn(CTkFrame):
         self.console_output.configure(text=message)
     
     def launch_signup(self):
+        self.reset_form()
         self.main_app.show_signup()  # Call the main app's method to show the SignUp screen
 
     def sign_in(self):
         # Implement sign-in functionality here
         username = self.username_entry.get()
         password = self.password_entry.get()
+        
+        # Start the loading animation in a separate thread
+        self.is_loading = True
+        self.angle = 0
+        self.update_circle()
         
         # Connect to the database
         conn = sqlite3.connect('thunder.db')
@@ -96,21 +109,70 @@ class SignIn(CTkFrame):
         if result:
             hashed_password = result[0]  # Already a string now
             if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):  # Convert string to bytes for comparison
-                # Open the dashboard and pass the username
-                self.hide()  # Hide current frame
-                dashboard = Dashboard(self.main_app, username)  # Pass the main app and username
-                dashboard.pack(fill='both', expand=True)  # Pack the dashboard frame
+                self.update_console("You signed in successfully! Please wait a moment")
+                self.after(5000, self.show_dashboard, username)
             else:
-                self.update_console("Incorrect password.")
+                self.update_console("Username or Password may be incorrect or they do not exist.")
+            
         else:
-            self.update_console("Username may not exist.")
-        
+            self.update_console("Username or Password may be incorrect or they do not exist.")
+            
         cursor.close()
         conn.close()
         print("Sign In button clicked")  # Placeholder for actual sign-in logic
 
+    
+    def update_circle(self):
+        # Check if loading should continue
+        if self.is_loading:
+            
+            self.canvas.delete("all")
+        
+            x_center = 15
+            y_center = 15
+            radius = 5
+            end_angle = self.angle + 180 # Half circle for the loading effect
+        
+            # Circle Segment
+            self.canvas.create_arc(
+                x_center - radius,
+                y_center - radius,
+                x_center + radius,
+                y_center + radius,
+                start = self.angle,
+                extent = 180,
+                fill = "white"
+            )
+        
+            # Update the angle for next time
+            self.angle += 10
+            if self.angle >= 360:
+                self.angle = 0
+        
+            self.after(50, self.update_circle)
+    
+    def show_dashboard(self,username):
+        self.reset_form()
+        # Hide current frame and open the dashboard
+        self.hide()
+        dashboard = Dashboard(self.main_app, username)
+        dashboard.pack(fill='both', expand=True)
+    
     def hide(self):
         self.pack_forget()  # Use pack_forget to hide the current screen
+        
+    def reset_form(self):
+        # Clear all input fields and reset error messages
+        self.username_entry.delete(0, "end")    # Clear the username
+        self.password_entry.delete(0, "end")    # Clear the password
+        self.update_console("")                 # Clear console
+        self.is_loading = False                 # Stop the loading circle
+        self.canvas.delete("all")               # Clear the loading circle
+        
+    def on_show(self):
+        self.reset_form()
+        self.is_loading = False
+        self.canvas.delete("all")
 
 if __name__ == "__main__":
     pass

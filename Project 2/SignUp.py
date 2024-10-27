@@ -2,6 +2,7 @@ from customtkinter import *
 import sqlite3
 import bcrypt  # Make sure to install bcrypt: pip install bcrypt
 import createuser
+import re
 
 
 class SignUp(CTkFrame):
@@ -17,7 +18,7 @@ class SignUp(CTkFrame):
         self.widget_sign_up_button()
         self.widget_alternative_sign_up_button()
         self.widget_return_to_sign_in_button()  # Ensure this button is created
-
+        
     def widget_welcome_section(self):
         # Welcome Label
         self.welcome_label = CTkLabel(master=self, text="Welcome to Thunder", font=("Arial", 30))
@@ -107,8 +108,25 @@ class SignUp(CTkFrame):
     def widget_return_to_sign_in_button(self):
         self.return_button = CTkButton(master=self, text="Back to Sign In", width=300, height=30, command=self.return_to_sign_in)
         self.return_button.place(relx=0.7, rely=0.936, anchor="center")  # Adjust position as needed
+    
 
+    def reset_form(self):
+        # Clear all input fields and reset error messages
+        self.username_entry.delete(0, "end")
+        self.password_entry.delete(0, "end")
+        self.confirm_password_entry.delete(0, "end")
+        
+        # Hide error label if it exists
+        if hasattr(self, "error_label"):
+            self.error_label.configure(text="")
+        
+        # Hide successfully created account message if it exists
+        if hasattr(self, "account_created_message"):
+            self.account_created_message.place_forget()
+    
     def return_to_sign_in(self):
+        # Return to the sign-in screen and reset the form
+        self.reset_form()
         self.main_app.show_signin()  # Call the main app's method to show the SignIn screen
 
     def sign_up(self):
@@ -116,17 +134,46 @@ class SignUp(CTkFrame):
         password = self.password_entry.get()
         confirm_password = self.confirm_password_entry.get()
 
+        # Error handling labels
+        def error_message(label, message):
+            label.configure(text=message)
+            label.place(relx=0.7, rely=0.7526, anchor="center")
+        
         # Validate inputs
+        if not hasattr(self, 'error_label'):
+            self.error_label = CTkLabel(master=self, text="", text_color = "red")
+            
+        if not re.match("^[A-Za-z0-9@.+-_]{1,150}$", username):
+            self.error_label.configure(text="Not all Username requirements are met!")
+            self.error_label.place(relx=0.7, rely=0.7526, anchor="center")
+            return
+        
         if not username or not password or not confirm_password:
-            print("All fields are required!")
+            error_message(self.error_label, " All fields are required!")
             return
+        
         if password != confirm_password:
-            print("Passwords do not match!")
+            error_message(self.error_label, "Passwords do not match!")
             return
+        
         if len(password) < 8:
-            print("Password must be at least 8 characters long!")
+            error_message(self.error_label, "Password must be at least 8 characters long!")
             return
-
+        
+        else:
+            self.error_label.place_forget()
+            
+        # Check if the username already exists
+        conn = sqlite3.connect('thunder.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+        if cursor.fetchone(): # When result is found, username exits
+            error_message(self.error_label, "Username already exists. Please choose another one.")
+            cursor.close()
+            conn.close()
+            return
+        
+        
         # Hash the password
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
@@ -135,8 +182,24 @@ class SignUp(CTkFrame):
 
         # Call the create_user function to insert into the database
         createuser.create_user(username, hashed_password_str)  # Pass the string
+        
+        cursor.close()
+        conn.close()
+        
+        # Account successfully created message
+        self.account_created_message = CTkLabel(
+            master=self,
+            text="Account created successfully.",
+            text_color="green"
+        )
+        self.account_created_message.place(relx=0.7, rely=0.7526, anchor="center")
+        
+        self.after(2000, self.return_to_sign_in)
+        
+    def return_to_sign_in(self):
+        self.reset_form()
+        self.main_app.show_signin()
 
-        self.return_to_sign_in()
 
     def hide(self):
         self.pack_forget()  # Use pack_forget to hide the current screen
