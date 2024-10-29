@@ -1,4 +1,5 @@
 from customtkinter import *
+from database import initialize_db
 from SignIn import SignIn
 from SignUp import SignUp
 
@@ -8,6 +9,8 @@ class MainApp:
         self.root = CTk()  # Create the main application window
         self.root.geometry("900x600")
         self.root.title("Thunder")
+
+        initialize_db()
 
         self.sign_in_screen = SignIn(self)  # Pass self
         self.sign_up_screen = SignUp(self)  # Pass self

@@ -1,7 +1,7 @@
 from customtkinter import *
 import sqlite3
 import bcrypt  # Make sure to install bcrypt: pip install bcrypt
-import createuser
+import database
 import re
 
 
@@ -181,7 +181,7 @@ class SignUp(CTkFrame):
         hashed_password_str = hashed_password.decode('utf-8')  # Convert bytes to string
 
         # Call the create_user function to insert into the database
-        createuser.create_user(username, hashed_password_str)  # Pass the string
+        database.create_user(username, hashed_password_str)  # Pass the string
         
         cursor.close()
         conn.close()
