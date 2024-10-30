@@ -47,7 +47,7 @@ def create_user(username, password):
 
 # Update the insert function to accept a username
 def insert_business_plan(username, business_name, description, goals, target_audience):
-    conn = sqlite3.connect("business_plans.db")
+    conn = sqlite3.connect("thunder.db")
     cursor = conn.cursor()
     cursor.execute('''INSERT INTO business_plans (username, business_name, description, goals, target_audience)
                       VALUES (?, ?, ?, ?, ?)''',
