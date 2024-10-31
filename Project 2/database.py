@@ -1,5 +1,6 @@
 # database.py
 import sqlite3
+from datetime import datetime
 
 # Database connection and table setup
 def initialize_db():
@@ -22,7 +23,8 @@ def initialize_db():
                         business_name TEXT NOT NULL,
                         description TEXT,
                         goals TEXT,
-                        target_audience TEXT
+                        target_audience TEXT,
+                        date_created TEXT NOT NULL
                     )''')
     conn.commit()
     conn.close()
@@ -49,8 +51,41 @@ def create_user(username, password):
 def insert_business_plan(username, business_name, description, goals, target_audience):
     conn = sqlite3.connect("thunder.db")
     cursor = conn.cursor()
-    cursor.execute('''INSERT INTO business_plans (username, business_name, description, goals, target_audience)
-                      VALUES (?, ?, ?, ?, ?)''',
-                   (username, business_name, description, goals, target_audience))
+    date_created = datetime.now().isoformat()  # Get current date and time in ISO 8601 format
+    cursor.execute('''INSERT INTO business_plans (username, business_name, description, goals, target_audience, date_created)
+                      VALUES (?, ?, ?, ?, ?, ?)''',
+                   (username, business_name, description, goals, target_audience, date_created))
     conn.commit()
     conn.close()
+
+def update_business_plan(original_business_name, new_business_name, description, goals, target_audience):
+    """Update an existing business plan"""
+    conn = sqlite3.connect("thunder.db")
+    try:
+        cursor = conn.cursor()
+        date_updated = datetime.now().isoformat() 
+        cursor.execute(""" 
+            UPDATE business_plans 
+            SET business_name = ?, description = ?, goals = ?, target_audience = ?, date_created = ?
+            WHERE business_name = ?
+        """, (new_business_name, description, goals, target_audience, date_updated, original_business_name))
+        conn.commit()
+        print(f"Business plan '{original_business_name}' updated to '{new_business_name}' successfully.")
+    except sqlite3.Error as e:
+        print(f"An error occurred while updating the business plan: {e}")
+    finally:
+        conn.close()
+
+def check_business_name_exists(business_name):
+    """Check if a business name already exists"""
+    conn = sqlite3.connect("thunder.db")
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM business_plans WHERE business_name = ?", (business_name,))
+        exists = cursor.fetchone()[0] > 0
+        return exists
+    except sqlite3.Error as e:
+        print(f"An error occurred while checking business name: {e}")
+        return False
+    finally:
+        conn.close()
