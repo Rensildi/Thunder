@@ -109,13 +109,19 @@ class SignIn(CTkFrame):
         if result:
             hashed_password = result[0]  # Already a string now
             if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):  # Convert string to bytes for comparison
+                self.update_console("")  # Clear any previous error messages
+                self.console_output.configure(text_color="green")  # Set text color to green for success message
                 self.update_console("You signed in successfully! Please wait a moment")
                 self.after(5000, self.show_dashboard, username)
             else:
                 self.update_console("Username or Password may be incorrect or they do not exist.")
+                self.is_loading = False # Preventing loading animation if the sign in is incorrect
+                self.canvas.delete("all") # Clear the loading animation
             
         else:
             self.update_console("Username or Password may be incorrect or they do not exist.")
+            self.is_loading = False # Preventing loading animation if the sign in is incorrect
+            self.canvas.delete("all") # Clear the loading animation
             
         cursor.close()
         conn.close()
@@ -171,6 +177,7 @@ class SignIn(CTkFrame):
         
     def on_show(self):
         self.reset_form()
+        self.password_entry.configure(show="*") # Ensure password is hidden
         self.is_loading = False
         self.canvas.delete("all")
 

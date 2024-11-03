@@ -32,6 +32,7 @@ class MainApp:
     def show_signin(self):
         self.sign_up_screen.pack_forget()  # Hide SignUp if it's open
         self.sign_in_screen.pack(fill='both', expand=True)  # Show SignIn
+        self.sign_in_screen.on_show() #Call the on_show method to reset the from.
 
     def show_signup(self):
         self.sign_in_screen.pack_forget()  # Hide SignIn if it's open

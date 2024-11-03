@@ -200,6 +200,13 @@ class SignUp(CTkFrame):
         self.reset_form()
         self.main_app.show_signin()
 
+    def on_show(self):
+        self.reset_form()
+        self.password_entry.configure(show="*") # Ensure password is hidden
+        self.confirm_password_entry.configure(show="*") # Ensure the confirm password is hidden
+    
+    
+
 
     def hide(self):
         self.pack_forget()  # Use pack_forget to hide the current screen
