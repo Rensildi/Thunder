@@ -8,7 +8,7 @@ import signal
 
 class MainApp:
     def __init__(self):
-        print("Initializing MainApp")  # Debugging statement
+        print("Initializing MainApp")  
         self.root = CTk()  # Create the main application window
         self.root.geometry("900x600")
         self.root.title("Thunder")
@@ -39,7 +39,6 @@ class MainApp:
         self.sign_up_screen.pack(fill='both', expand=True)  # Show SignUp
 
 if __name__ == "__main__":
-    # If you need to run a server, add that functionality here
     app = MainApp()  # Create an instance of MainApp
     app.root.protocol("WM_DELETE_WINDOW", app.on_closing)
     app.run()  # Run the application

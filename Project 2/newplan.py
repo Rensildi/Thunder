@@ -156,6 +156,9 @@ class BusinessPlanForm(CTkToplevel):
             insert_business_plan(self.username, new_business_name, description, goals, target_audience)
             print("Business Plan Submitted and Saved to Database")
 
+        # Refresh business plans upon submission of plan (created or edited)
+        self.master.load_business_plans()
+
         # Close the form window after submission
         self.destroy()
     
