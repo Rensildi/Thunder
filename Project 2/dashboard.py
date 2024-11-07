@@ -3,6 +3,7 @@ from newplan import BusinessPlanForm
 from datetime import datetime
 import sqlite3
 from tkinter import messagebox
+import threading
 
 class Dashboard(CTkFrame):
     def __init__(self, main_app, username):
@@ -19,7 +20,10 @@ class Dashboard(CTkFrame):
 
     def create_widgets(self):
         # Dashboard Label
-        self.label = CTkLabel(self, text=f"Welcome to the Dashboard, {self.username}!", font=("Arial", 24))
+        self.label = CTkLabel(
+            self,
+            text=f"Thunder",
+            font=("Arial", 24))
         self.label.pack(pady=20)
 
         # # "Create New Business Plan" Button
@@ -63,6 +67,38 @@ class Dashboard(CTkFrame):
 
         self.next_button = CTkButton(self.controls_frame, text="Next", command=lambda: self.change_page(1))
         self.next_button.pack(side='right', padx=15)
+        
+        # Notification Label
+        self.notification_label = CTkLabel(
+            self, 
+            text=(f"Welcome {self.username}"), 
+            font=("Arial", 16), 
+            fg_color="gray",
+            width=300, 
+            height=40
+            )
+        self.notification_label.place(
+            relx=0.5,
+            y=10,
+            anchor="n" # Near to the top center is positioned
+        )
+        self.notification_label.pack_forget() # By default notification is hidden
+    
+    
+    ### NOTIFICATION FEATURE
+    
+    # def show_notification(self, message="This is a notification!", duration=3):
+    #     ''' Notification toast-style '''
+    #     self.notification_label.configure(text=message) # Update message
+    #     self.notification_label.pack() # Show the notification
+        
+    #     # Hide the notification after 3 seconds
+    #     self.after(duration * 1000, self.remove_notification)
+    
+    # def remove_notification(self):
+    #     ''' Hide the notification after 3 seconds '''
+    #     self.notification_label.pack_forget()
+        
 
     def option_selected(self, selected_option):
         ''' Handle the option selected from the dropdown '''
