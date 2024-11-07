@@ -22,13 +22,27 @@ class Dashboard(CTkFrame):
         self.label = CTkLabel(self, text=f"Welcome to the Dashboard, {self.username}!", font=("Arial", 24))
         self.label.pack(pady=20)
 
-        # "Create New Business Plan" Button
-        self.create_plan_button = CTkButton(self, text="Create New Business Plan", command=self.open_business_plan_form)
-        self.create_plan_button.pack(pady=10)  
+        # # "Create New Business Plan" Button
+        # self.create_plan_button = CTkButton(self, text="Create New Business Plan", command=self.open_business_plan_form)
+        # self.create_plan_button.pack(pady=10)  
         
-        # Logout Button
-        self.logout_button = CTkButton(self, text="Logout", command=self.logout)
-        self.logout_button.pack(pady=10)  
+        # # Logout Button
+        # self.logout_button = CTkButton(self, text="Logout", command=self.logout)
+        # self.logout_button.pack(pady=10)  
+        
+        # Dropdown display
+        
+        # Adding options
+        options = [
+            "Profile",
+            "New plan",
+            "Settings",
+            "Log Out"
+        ]
+        self.dropdown_menu = CTkOptionMenu(self, values=options, command=self.option_selected)
+        self.dropdown_menu.set(self.username) # Set initial text to username
+        # Position == Top Right (NE)
+        self.dropdown_menu.place(relx=1.0, x=-10, y=10, anchor="ne")
 
         # Search Entry
         self.search_entry = CTkEntry(self, placeholder_text="Search Business Plans...")
@@ -50,6 +64,20 @@ class Dashboard(CTkFrame):
         self.next_button = CTkButton(self.controls_frame, text="Next", command=lambda: self.change_page(1))
         self.next_button.pack(side='right', padx=15)
 
+    def option_selected(self, selected_option):
+        ''' Handle the option selected from the dropdown '''
+        if selected_option == "Profile":
+            self.show_profile() # Handle profile action if needed
+        elif selected_option == "New plan":
+            self.open_business_plan_form() # Call the functio nto create a new business plan
+        elif selected_option == "Settings":
+            self.show_settings() # Handle settings action if needed
+        elif selected_option == "Log Out":
+            self.logout() # Call logout functionality
+        
+        # Reset the dorpdown to show the username again after selection
+        self.dropdown_menu.set(self.username)
+    
     def open_business_plan_form(self):
         # Open the business plan form in a new window
         plan_window = BusinessPlanForm(self, self.username)
@@ -62,6 +90,16 @@ class Dashboard(CTkFrame):
         else:
             self.pack_forget()
             self.main_app.show_signin()
+    
+    def show_profile(self):
+        '''Navigating to the user profile'''
+        print(f"Showing profile for {self.username}")
+        # The profile view is not yet implemented
+    
+    def show_settings(self):
+        '''Navigate to the settings page'''
+        print(f"Openining Settings...")
+        # The settings view is not yet implemented
 
     def load_business_plans(self):
         """Load previous business plans for the logged-in user and paginate"""
