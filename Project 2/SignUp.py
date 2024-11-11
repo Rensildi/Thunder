@@ -1,6 +1,7 @@
 from customtkinter import *
+from PIL import Image, ImageDraw, ImageOps
 import sqlite3
-import bcrypt  # Make sure to install bcrypt: pip install bcrypt
+import bcrypt 
 import database
 import re
 
@@ -17,8 +18,33 @@ class SignUp(CTkFrame):
         self.widget_password_section()
         self.widget_sign_up_button()
         self.widget_alternative_sign_up_button()
-        self.widget_return_to_sign_in_button()  # Ensure this button is created
-        
+        self.widget_return_to_sign_in_button()  
+        self.widget_image_section()
+
+    def widget_image_section(self):
+        """Add an image to the left side of the window"""
+
+        image_path = "images/signup.jpg"  
+        pil_image = Image.open(image_path).convert("RGBA")  # Ensure image has alpha channel for transparency
+
+        # Set radius for rounded corners
+        radius = 20 
+
+        # Create mask
+        rounded_mask = Image.new("L", pil_image.size, 0)
+        draw = ImageDraw.Draw(rounded_mask)
+        draw.rounded_rectangle((0, 0) + pil_image.size, radius=radius, fill=255)
+
+        # Apply mask
+        rounded_image = ImageOps.fit(pil_image, pil_image.size)
+        rounded_image.putalpha(rounded_mask)  
+
+        image = CTkImage(light_image=rounded_image, size=(350, 475))  
+
+        self.image_label = CTkLabel(master=self, image=image, text="")  
+        self.image_label.place(relx=0.26, rely=0.51, anchor="center")   
+
+    
     def widget_welcome_section(self):
         # Welcome Label
         self.welcome_label = CTkLabel(master=self, text="Welcome to Thunder", font=("Arial", 30))
@@ -35,7 +61,7 @@ class SignUp(CTkFrame):
 
         # Asterisk for username
         self.username_asterisk = CTkLabel(master=self, text='*', text_color="red")
-        self.username_asterisk.place(relx=0.6, rely=0.22)
+        self.username_asterisk.place(relx=0.61, rely=0.22)
 
         # Username entry
         self.username_entry = CTkEntry(master=self, placeholder_text="Username", width=300)
@@ -44,10 +70,10 @@ class SignUp(CTkFrame):
         # Username requirements
         self.username_requirements = CTkLabel(
             master=self,
-            text="Required 150 characters or less. Letters digits and @/./+/-/_ only",
+            text="Choose a unique username.",
             text_color="grey"
         )
-        self.username_requirements.place(relx=0.536, rely=0.3)
+        self.username_requirements.place(relx=0.536, rely=0.303)
 
     def widget_password_section(self):
         # Password label
@@ -56,7 +82,7 @@ class SignUp(CTkFrame):
 
         # Asterisk for password
         self.password_asterisk = CTkLabel(master=self, text='*', text_color="red")
-        self.password_asterisk.place(relx=0.6, rely=0.38)
+        self.password_asterisk.place(relx=0.605, rely=0.38)
 
         # Password entry
         self.password_entry = CTkEntry(master=self, placeholder_text="Password", show="*", width=300)
@@ -65,27 +91,24 @@ class SignUp(CTkFrame):
         # Password requirements
         self.password_requirements = CTkLabel(
             master=self,
-            text="Your password can't be too similar to your other personal info.\n"
-                 "Your password must contain at least 8 characters.\n"
-                 "Your password can't be a commonly used password.\n"
-                 "Your password can't be entirely numeric.",
+            text="Choose a strong and unique password.",
             justify='left',
             text_color="grey",
             width=300
         )
-        self.password_requirements.place(relx=0.536, rely=0.52, anchor='w')
+        self.password_requirements.place(relx=0.497, rely=0.489, anchor='w')
 
         # Confirm Password Label
         self.confirm_password_label = CTkLabel(master=self, text="Confirm Password")
-        self.confirm_password_label.place(relx=0.536, rely=0.6)
+        self.confirm_password_label.place(relx=0.536, rely=0.54)
 
         # Asterisk for confirm password
         self.confirm_password_asterisk = CTkLabel(master=self, text='*', text_color="red")
-        self.confirm_password_asterisk.place(relx=0.654, rely=0.6)
+        self.confirm_password_asterisk.place(relx=0.665, rely=0.54)
 
         # Confirm Password entry
         self.confirm_password_entry = CTkEntry(master=self, placeholder_text="Confirm Password", show="*", width=300)
-        self.confirm_password_entry.place(relx=0.7, rely=0.66, anchor="center")
+        self.confirm_password_entry.place(relx=0.7, rely=0.60, anchor="center")
 
         # Confirm Password requirements
         self.confirm_password_requirements = CTkLabel(
@@ -93,21 +116,21 @@ class SignUp(CTkFrame):
             text="Enter the same Password as before",
             text_color="grey"
         )
-        self.confirm_password_requirements.place(relx=0.536, rely=0.71, anchor="w")
+        self.confirm_password_requirements.place(relx=0.536, rely=0.649, anchor="w")
 
     def widget_sign_up_button(self):
         # Sign Up button
         self.sign_up_button = CTkButton(master=self, text="Sign Up", width=300, height=30, command=self.sign_up)
-        self.sign_up_button.place(relx=0.7, rely=0.8, anchor="center")
+        self.sign_up_button.place(relx=0.7, rely=0.745, anchor="center")
 
     def widget_alternative_sign_up_button(self):
         # Alternative sign up Google button
         self.continue_google_button = CTkButton(master=self, text="Continue With Google", width=300, height=30)
-        self.continue_google_button.place(relx=0.7, rely=0.868, anchor="center")
+        self.continue_google_button.place(relx=0.7, rely=0.813, anchor="center")
 
     def widget_return_to_sign_in_button(self):
         self.return_button = CTkButton(master=self, text="Back to Sign In", width=300, height=30, command=self.return_to_sign_in)
-        self.return_button.place(relx=0.7, rely=0.936, anchor="center")  # Adjust position as needed
+        self.return_button.place(relx=0.7, rely=0.881, anchor="center")  # Adjust position as needed
     
 
     def reset_form(self):

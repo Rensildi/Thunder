@@ -27,8 +27,8 @@ class Dashboard(CTkFrame):
         self.label.pack(pady=20)
 
         # # "Create New Business Plan" Button
-        # self.create_plan_button = CTkButton(self, text="Create New Business Plan", command=self.open_business_plan_form)
-        # self.create_plan_button.pack(pady=10)  
+        self.create_plan_button = CTkButton(self, text="Create New Business Plan", command=self.open_business_plan_form)
+        self.create_plan_button.pack(pady=10)  
         
         # # Logout Button
         # self.logout_button = CTkButton(self, text="Logout", command=self.logout)

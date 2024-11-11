@@ -1,4 +1,5 @@
 from customtkinter import *
+from PIL import Image, ImageDraw, ImageOps
 #import createuser
 import sqlite3
 import bcrypt
@@ -22,10 +23,34 @@ class SignIn(CTkFrame):
         self.widget_sign_up_button()
         self.widget_console_output()
         self.widget_alternative_sign_in_button()
+        self.widget_image_section()
         
         # Create a Canvas for the circular loading animation
         self.canvas = CTkCanvas(self, width=30, height=30, bg="#2E2E2E", highlightthickness=0, bd=0)
         self.canvas.place(relx=0.7, rely=0.94, anchor="center")
+
+    def widget_image_section(self):
+        """Add an image to the left side of the window"""
+
+        image_path = "images/thunder1.jpg"  
+        pil_image = Image.open(image_path).convert("RGBA")  # Ensure image has alpha channel for transparency
+
+        # Set radius for rounded corners
+        radius = 20 
+
+        # Create mask
+        rounded_mask = Image.new("L", pil_image.size, 0)
+        draw = ImageDraw.Draw(rounded_mask)
+        draw.rounded_rectangle((0, 0) + pil_image.size, radius=radius, fill=255)
+
+        # Apply mask
+        rounded_image = ImageOps.fit(pil_image, pil_image.size)
+        rounded_image.putalpha(rounded_mask)  
+
+        image = CTkImage(light_image=rounded_image, size=(350, 475))  
+
+        self.image_label = CTkLabel(master=self, image=image, text="")  
+        self.image_label.place(relx=0.26, rely=0.51, anchor="center")  
 
     def widget_welcome_section(self):
         # Welcome Label
