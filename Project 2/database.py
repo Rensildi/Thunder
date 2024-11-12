@@ -89,3 +89,24 @@ def check_business_name_exists(business_name):
         return False
     finally:
         conn.close()
+
+def get_business_plan_data(username, business_name):
+    """Fetch the business plan data from the database for the given username and business_name."""
+    connection = sqlite3.connect("thunder.db") 
+    cursor = connection.cursor()
+    
+    query = """
+    SELECT description, goals, target_audience
+    FROM business_plans
+    WHERE username = ? AND business_name = ?
+    """
+    cursor.execute(query, (username, business_name))
+    
+    result = cursor.fetchone()  
+    
+    connection.close()
+    
+    if result:
+        return result  
+    else:
+        return None          

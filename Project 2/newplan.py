@@ -1,8 +1,12 @@
 from customtkinter import CTkToplevel, CTkLabel, CTkEntry, CTkButton, CTkTextbox, CTkFrame, CTkScrollableFrame
-from database import insert_business_plan, update_business_plan, check_business_name_exists
+from database import insert_business_plan, update_business_plan, check_business_name_exists, get_business_plan_data
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
+from tkinter import Toplevel, filedialog, messagebox, Button
+from io import BytesIO
+from pdf import BusinessPlanPDFGenerator
+from reportlab.pdfgen import canvas
 
 load_dotenv()
 
@@ -75,6 +79,11 @@ class BusinessPlanForm(CTkToplevel):
         self.submit_button = CTkButton(self.form_frame, text="Submit", command=self.submit_business_plan)
         self.submit_button.pack(pady=10)
 
+        # Create PDF Button
+        self.create_pdf_button = CTkButton(self.form_frame, text="Create PDF", command=self.create_pdf)
+        self.create_pdf_button.pack(pady=10)
+
+
     def initialize_create_form(self):
         """Show form for creating a new business plan"""
 
@@ -93,21 +102,25 @@ class BusinessPlanForm(CTkToplevel):
         self.goals_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
         self.goals_entry.grid(row=5, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
 
-        CTkLabel(self.scrollable_form_frame, text="Mission Statement:", font=("Arial", 14)).grid(row=6, column=0, sticky="w", padx=(5, 10), pady=0)
+        CTkLabel(self.scrollable_form_frame, text="Target Audience:", font=("Arial", 14)).grid(row=6, column=0, sticky="w", padx=(5, 10), pady=0)
+        self.target_audience_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
+        self.target_audience_entry.grid(row=7, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+
+        CTkLabel(self.scrollable_form_frame, text="Mission Statement:", font=("Arial", 14)).grid(row=8, column=0, sticky="w", padx=(5, 10), pady=0)
         self.mission_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.mission_entry.grid(row=7, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.mission_entry.grid(row=9, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
 
-        CTkLabel(self.scrollable_form_frame, text="Projected Earnings:", font=("Arial", 14)).grid(row=8, column=0, sticky="w", padx=(5, 10), pady=0)
+        CTkLabel(self.scrollable_form_frame, text="Projected Earnings:", font=("Arial", 14)).grid(row=10, column=0, sticky="w", padx=(5, 10), pady=0)
         self.earnings_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.earnings_entry.grid(row=9, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.earnings_entry.grid(row=11, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
 
-        CTkLabel(self.scrollable_form_frame, text="Marketing Strategy:", font=("Arial", 14)).grid(row=10, column=0, sticky="w", padx=(5, 10), pady=0)
+        CTkLabel(self.scrollable_form_frame, text="Marketing Strategy:", font=("Arial", 14)).grid(row=12, column=0, sticky="w", padx=(5, 10), pady=0)
         self.marketing_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.marketing_entry.grid(row=11, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.marketing_entry.grid(row=13, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
 
-        CTkLabel(self.scrollable_form_frame, text="Budget:", font=("Arial", 14)).grid(row=12, column=0, sticky="w", padx=(5, 10), pady=0)
+        CTkLabel(self.scrollable_form_frame, text="Budget:", font=("Arial", 14)).grid(row=14, column=0, sticky="w", padx=(5, 10), pady=0)
         self.budget_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.budget_entry.grid(row=13, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.budget_entry.grid(row=15, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
         
     def initialize_edit_form(self, description, goals, target_audience):
         """Show form for editing a plan"""
@@ -117,37 +130,42 @@ class BusinessPlanForm(CTkToplevel):
         CTkLabel(self.scrollable_form_frame, text="Business Name:", font=("Arial", 14)).grid(row=0, column=0, sticky="w", padx=(5, 10), pady=0)
         self.name_entry = CTkTextbox(self.scrollable_form_frame, height=20, wrap="word")
         self.name_entry.grid(row=1, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-        self.name_entry.insert(0, self.original_business_name)
+        self.name_entry.insert("1.0", self.original_business_name)
 
         CTkLabel(self.scrollable_form_frame, text="Description:", font=("Arial", 14)).grid(row=2, column=0, sticky="w", padx=(5, 10), pady=0)
         self.description_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
         self.description_entry.grid(row=3, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-        self.description_entry.insert(0, description)
+        self.description_entry.insert("1.0", description)
 
         CTkLabel(self.scrollable_form_frame, text="Goals:", font=("Arial", 14)).grid(row=4, column=0, sticky="w", padx=(5, 10), pady=0)
         self.goals_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
         self.goals_entry.grid(row=5, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-        self.goals_entry.insert(0, goals)
+        self.goals_entry.insert("1.0", goals)
 
-        CTkLabel(self.scrollable_form_frame, text="Mission Statement:", font=("Arial", 14)).grid(row=6, column=0, sticky="w", padx=(5, 10), pady=0)
+        CTkLabel(self.scrollable_form_frame, text="Target Audience:", font=("Arial", 14)).grid(row=6, column=0, sticky="w", padx=(5, 10), pady=0)
+        self.target_audience_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
+        self.target_audience_entry.grid(row=7, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.target_audience_entry.insert("1.0", target_audience)
+
+        CTkLabel(self.scrollable_form_frame, text="Mission Statement:", font=("Arial", 14)).grid(row=8, column=0, sticky="w", padx=(5, 10), pady=0)
         self.mission_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.mission_entry.grid(row=7, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-        self.mission_entry.insert(0, self.original_business_name)
+        self.mission_entry.grid(row=9, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.mission_entry.insert("1.0", self.original_business_name)
 
-        CTkLabel(self.scrollable_form_frame, text="Projected Earnings:", font=("Arial", 14)).grid(row=8, column=0, sticky="w", padx=(5, 10), pady=0)
+        CTkLabel(self.scrollable_form_frame, text="Projected Earnings:", font=("Arial", 14)).grid(row=10, column=0, sticky="w", padx=(5, 10), pady=0)
         self.earnings_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.earnings_entry.grid(row=9, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-        self.earnings_entry.insert(0, description)
+        self.earnings_entry.grid(row=11, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.earnings_entry.insert("1.0", description)
 
-        CTkLabel(self.scrollable_form_frame, text="Marketing Strategy:", font=("Arial", 14)).grid(row=10, column=0, sticky="w", padx=(5, 10), pady=0)
+        CTkLabel(self.scrollable_form_frame, text="Marketing Strategy:", font=("Arial", 14)).grid(row=12, column=0, sticky="w", padx=(5, 10), pady=0)
         self.marketing_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.marketing_entry.grid(row=11, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-        self.marketing_entry.insert(0, goals)
+        self.marketing_entry.grid(row=13, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.marketing_entry.insert("1.0", goals)
 
-        CTkLabel(self.scrollable_form_frame, text="Budget:", font=("Arial", 14)).grid(row=12, column=0, sticky="w", padx=(5, 10), pady=0)
+        CTkLabel(self.scrollable_form_frame, text="Budget:", font=("Arial", 14)).grid(row=14, column=0, sticky="w", padx=(5, 10), pady=0)
         self.budget_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.budget_entry.grid(row=13, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-        self.budget_entry.insert(0, target_audience)
+        self.budget_entry.grid(row=15, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.budget_entry.insert("1.0", target_audience)
 
     def initialize_ai_chat(self):
         """Initialize the AI Chat section in ai_frame"""
@@ -166,10 +184,10 @@ class BusinessPlanForm(CTkToplevel):
 
     def submit_business_plan(self):
         # Collect data from form fields
-        new_business_name = self.name_entry.get()
-        description = self.description_entry.get()
-        goals = self.goals_entry.get()
-        target_audience = self.target_audience_entry.get()
+        new_business_name = self.name_entry.get("1.0", "end").strip()
+        description = self.description_entry.get("1.0", "end").strip()
+        goals = self.goals_entry.get("1.0", "end").strip()
+        target_audience = self.target_audience_entry.get("1.0", "end").strip()
 
         if self.original_business_name:
             if new_business_name != self.original_business_name:
@@ -212,3 +230,30 @@ class BusinessPlanForm(CTkToplevel):
         # Update history
         history.append({"role": "user", "parts": [f"\n\n{user_message}\n\n"]})
         history.append({"role": "model", "parts": [f"\n\n{model_response}\n\n"]})
+
+    def create_pdf(self):
+        """Create the business plan PDF and preview it in the system's default viewer"""
+        # Get data from the form to create the business plan
+        business_plan_data = get_business_plan_data(self.username, self.original_business_name)
+
+        if business_plan_data:
+            # Generate the PDF using the BusinessPlanPDFGenerator class
+            pdf_generator = BusinessPlanPDFGenerator(business_plan_data)
+            pdf_file = pdf_generator.generate_pdf()
+
+            # Call the method to preview the PDF externally
+            self.preview_pdf(pdf_file)
+        else:
+            messagebox.showerror("Error", "Could not fetch business plan data.")
+
+    def preview_pdf(self, pdf_file):
+        """Preview the pdf using default PDF viewer"""
+        # Create a temporary file path for saving PDF
+        temp_file_path = os.path.join(os.path.expanduser("~"), "business_plan_preview.pdf")
+
+        # Save PDF to the temporary file
+        with open(temp_file_path, "wb") as f:
+            f.write(pdf_file.read())
+
+        # Open PDF using system's default viewer
+        os.startfile(temp_file_path)
