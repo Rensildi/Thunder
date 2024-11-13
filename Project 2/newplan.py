@@ -1,4 +1,4 @@
-from customtkinter import CTkToplevel, CTkLabel, CTkEntry, CTkButton, CTkTextbox, CTkFrame, CTkScrollableFrame
+from customtkinter import CTkToplevel, CTkLabel, CTkEntry, CTkButton, CTkTextbox, CTkFrame, CTkScrollableFrame, CTkImage
 from database import insert_business_plan, update_business_plan, check_business_name_exists, get_business_plan_data
 import os
 import google.generativeai as genai
@@ -7,7 +7,8 @@ from tkinter import Toplevel, filedialog, messagebox, Button
 from io import BytesIO
 from pdf import BusinessPlanPDFGenerator
 from reportlab.pdfgen import canvas
-
+from PIL import Image, ImageTk
+from CTkMessagebox import CTkMessagebox
 load_dotenv()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -43,6 +44,11 @@ model = genai.GenerativeModel(
 
 history = []
 
+# Load the question mark image
+question_mark_image = Image.open("images/help-icon.png")
+question_mark_image = question_mark_image.resize((20, 20), Image.Resampling.LANCZOS)
+question_mark_ctk_image = CTkImage(light_image=question_mark_image, dark_image=question_mark_image, size=(20, 20))
+
 class BusinessPlanForm(CTkToplevel):
     def __init__(self, master, username, business_name=None, description="", goals="", target_audience=""):
         super().__init__(master)
@@ -75,52 +81,70 @@ class BusinessPlanForm(CTkToplevel):
         # Initialize AI Chat section
         self.initialize_ai_chat()
 
-        # Submit Button
-        self.submit_button = CTkButton(self.form_frame, text="Submit", command=self.submit_business_plan)
+        # Save Button
+        self.submit_button = CTkButton(self.form_frame, text="Save", command=self.submit_business_plan)
         self.submit_button.pack(pady=10)
 
         # Create PDF Button
         self.create_pdf_button = CTkButton(self.form_frame, text="Create PDF", command=self.create_pdf)
         self.create_pdf_button.pack(pady=10)
 
-
+    def help_explanation(self, message, event=None):
+      CTkMessagebox(title="Explanation", message=message, icon="info")
+    
     def initialize_create_form(self):
         """Show form for creating a new business plan"""
-
         # Configure the column to expand
         self.scrollable_form_frame.grid_columnconfigure(0, weight=1)
-
+        
         CTkLabel(self.scrollable_form_frame, text="Business Name:", font=("Arial", 14)).grid(row=0, column=0, sticky="w", padx=(5, 10), pady=0)
+        help_icon_label = CTkLabel(self.scrollable_form_frame, text="", image=question_mark_ctk_image)
+        help_icon_label.grid(row=0, column=1, sticky="e", padx=(5,10), pady=0)
+        help_icon_label.bind("<Button-1>", lambda e: self.help_explanation("What would you like to call your business? Choose a name that reflects its purpose and stands out to your audience"))
         self.name_entry = CTkTextbox(self.scrollable_form_frame, height=20, wrap="word")
         self.name_entry.grid(row=1, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-
+        
         CTkLabel(self.scrollable_form_frame, text="Description:", font=("Arial", 14)).grid(row=2, column=0, sticky="w", padx=(5, 10), pady=0)
+        help_icon_label = CTkLabel(self.scrollable_form_frame, text="", image=question_mark_ctk_image)
+        help_icon_label.grid(row=2, column=1, sticky="e", padx=(5,10), pady=0)
+        help_icon_label.bind("<Button-1>", lambda e: self.help_explanation("Describe your business. What products or services do you offer? What problem does your business solve, and how does it add value to customers?"))
         self.description_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
         self.description_entry.grid(row=3, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-
+        
         CTkLabel(self.scrollable_form_frame, text="Goals:", font=("Arial", 14)).grid(row=4, column=0, sticky="w", padx=(5, 10), pady=0)
+        help_icon_label = CTkLabel(self.scrollable_form_frame, text="", image=question_mark_ctk_image)
+        help_icon_label.grid(row=4, column=1, sticky="e", padx=(5,10), pady=0)
+        help_icon_label.bind("<Button-1>", lambda e: self.help_explanation("What are the key objectives for your business? Think about both short-term and long-term goals that will help guide its growth and success."))
         self.goals_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
         self.goals_entry.grid(row=5, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-
-        CTkLabel(self.scrollable_form_frame, text="Target Audience:", font=("Arial", 14)).grid(row=6, column=0, sticky="w", padx=(5, 10), pady=0)
-        self.target_audience_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.target_audience_entry.grid(row=7, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-
-        CTkLabel(self.scrollable_form_frame, text="Mission Statement:", font=("Arial", 14)).grid(row=8, column=0, sticky="w", padx=(5, 10), pady=0)
+        
+        CTkLabel(self.scrollable_form_frame, text="Mission Statement:", font=("Arial", 14)).grid(row=6, column=0, sticky="w", padx=(5, 10), pady=0)
+        help_icon_label = CTkLabel(self.scrollable_form_frame, text="", image=question_mark_ctk_image)
+        help_icon_label.grid(row=6, column=1, sticky="e", padx=(5,10), pady=0)
+        help_icon_label.bind("<Button-1>", lambda e: self.help_explanation("Summarize the purpose and core values of your business. What drives your business, and what impact do you want to make on customers and the community?"))
         self.mission_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.mission_entry.grid(row=9, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-
-        CTkLabel(self.scrollable_form_frame, text="Projected Earnings:", font=("Arial", 14)).grid(row=10, column=0, sticky="w", padx=(5, 10), pady=0)
+        self.mission_entry.grid(row=7, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        
+        CTkLabel(self.scrollable_form_frame, text="Projected Earnings:", font=("Arial", 14)).grid(row=8, column=0, sticky="w", padx=(5, 10), pady=0)
+        help_icon_label = CTkLabel(self.scrollable_form_frame, text="", image=question_mark_ctk_image)
+        help_icon_label.grid(row=8, column=1, sticky="e", padx=(5,10), pady=0)
+        help_icon_label.bind("<Button-1>", lambda e: self.help_explanation("Estimate the financial potential of your business. Include expected revenue and profits over specific periods to help guide planning and investments."))
         self.earnings_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.earnings_entry.grid(row=11, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-
-        CTkLabel(self.scrollable_form_frame, text="Marketing Strategy:", font=("Arial", 14)).grid(row=12, column=0, sticky="w", padx=(5, 10), pady=0)
+        self.earnings_entry.grid(row=9, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        
+        CTkLabel(self.scrollable_form_frame, text="Marketing Strategy:", font=("Arial", 14)).grid(row=10, column=0, sticky="w", padx=(5, 10), pady=0)
+        help_icon_label = CTkLabel(self.scrollable_form_frame, text="", image=question_mark_ctk_image)
+        help_icon_label.grid(row=10, column=1, sticky="e", padx=(5,10), pady=0)
+        help_icon_label.bind("<Button-1>", lambda e: self.help_explanation("Describe how you'll promote your business to reach your target audience. Consider channels like social media, advertising, partnerships, and other tactics to attract and retain customers."))
         self.marketing_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.marketing_entry.grid(row=13, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
-
-        CTkLabel(self.scrollable_form_frame, text="Budget:", font=("Arial", 14)).grid(row=14, column=0, sticky="w", padx=(5, 10), pady=0)
+        self.marketing_entry.grid(row=11, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        
+        CTkLabel(self.scrollable_form_frame, text="Budget:", font=("Arial", 14)).grid(row=12, column=0, sticky="w", padx=(5, 10), pady=0)
+        help_icon_label = CTkLabel(self.scrollable_form_frame, text="", image=question_mark_ctk_image)
+        help_icon_label.grid(row=12, column=1, sticky="e", padx=(5,10), pady=0)
+        help_icon_label.bind("<Button-1>", lambda e: self.help_explanation("Outline the financial resources required for your business. Include expenses like production, marketing, operations, and other costs to maintain financial stability."))
         self.budget_entry = CTkTextbox(self.scrollable_form_frame, height=100, wrap="word")
-        self.budget_entry.grid(row=15, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.budget_entry.grid(row=13, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
         
     def initialize_edit_form(self, description, goals, target_audience):
         """Show form for editing a plan"""
