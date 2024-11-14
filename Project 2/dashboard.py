@@ -3,7 +3,16 @@ from newplan import BusinessPlanForm
 from datetime import datetime
 import sqlite3
 from tkinter import messagebox
+from CTkMessagebox import CTkMessagebox
+from PIL import Image, ImageTk
 import threading
+
+question_mark_image = Image.open("images/help-icon.png")
+question_mark_image = question_mark_image.resize((20, 20), Image.Resampling.LANCZOS)
+question_mark_ctk_image = CTkImage(light_image=question_mark_image, dark_image=question_mark_image, size=(20, 20))
+
+def help_explanation(message, event=None):
+    CTkMessagebox(title="Explanation", message=message, icon="info")
 
 class Dashboard(CTkFrame):
     def __init__(self, main_app, username):
@@ -32,7 +41,7 @@ class Dashboard(CTkFrame):
         
         # # Logout Button
         # self.logout_button = CTkButton(self, text="Logout", command=self.logout)
-        # self.logout_button.pack(pady=10)  
+        # self.logout_button.pack(pady=10)
         
         # Dropdown display
         
@@ -83,6 +92,30 @@ class Dashboard(CTkFrame):
             anchor="n" # Near to the top center is positioned
         )
         self.notification_label.pack_forget() # By default notification is hidden
+        
+        self.add_help_icons()
+    
+    def add_help_icons(self):
+        help_icon_label = CTkLabel(self, text="", image=question_mark_ctk_image)
+        help_icon_label.place(relx=0.0065, rely=0.0065)
+        help_icon_label.bind("<Button-1>", lambda e: help_explanation("This is your dashobard where you can manage your business plans."))
+        
+        help_icon_label = CTkLabel(self, text="", image=question_mark_ctk_image)
+        help_icon_label.place(relx=0.6, rely=0.13)
+        help_icon_label.bind("<Button-1>", lambda e: help_explanation("Click here to create a new business plan."))
+        
+        help_icon_label = CTkLabel(self, text="", image=question_mark_ctk_image)
+        help_icon_label.place(relx=0.80, rely=0.017799)
+        help_icon_label.bind("<Button-1>", lambda e: help_explanation("Use this dropdown to navigate to different sections of the app."))
+
+        help_icon_label = CTkLabel(self, text="", image=question_mark_ctk_image)
+        help_icon_label.place(relx=0.7283, rely=0.208)
+        help_icon_label.bind("<Button-1>", lambda e: help_explanation("Search for your business plans here."))
+
+        help_icon_label = CTkLabel(self, text="", image=question_mark_ctk_image)
+        help_icon_label.place(relx=0.7283, rely=0.8439)
+        help_icon_label.bind("<Button-1>", lambda e: help_explanation("Navigate through pages of your business plans using these buttons."))
+
     
     
     ### NOTIFICATION FEATURE
@@ -275,4 +308,4 @@ class Dashboard(CTkFrame):
         window.destroy()  
 
 if __name__ == "__main__":
-    pass  
+    pass
