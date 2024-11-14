@@ -18,8 +18,7 @@ class MainApp:
         # Start the app by running the main onboarding flow
         self.run()
 
-
-# Create the MainApp instance and run the onboarding screens
+# For testign purposes 
 if __name__ == "__main__":
     app = MainApp()
     app.start()
