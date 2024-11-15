@@ -24,6 +24,10 @@ class Dashboard(CTkFrame):
         self.page_size = 8  # Number of plans per page
         self.current_page = 1  # Track the current page number
         
+        # Tutorial feature
+        self.tutorial_enabled = True # Default state of Tutorial
+        
+        
         self.create_widgets()  
         self.load_business_plans()  
 
@@ -49,6 +53,7 @@ class Dashboard(CTkFrame):
         options = [
             "Profile",
             "New plan",
+            "Disable Tutorial",
             "Settings",
             "Log Out"
         ]
@@ -96,25 +101,38 @@ class Dashboard(CTkFrame):
         self.add_help_icons()
     
     def add_help_icons(self):
+        ''' Add the help icons (with their initial positions stored) '''
+        self.help_icons = []  # Store the icons and their positions
+        
+        # Create and place help icons with stored positions
         help_icon_label = CTkLabel(self, text="", image=question_mark_ctk_image)
         help_icon_label.place(relx=0.0065, rely=0.0065)
-        help_icon_label.bind("<Button-1>", lambda e: help_explanation("This is your dashobard where you can manage your business plans."))
+        self.help_icons.append({'icon': help_icon_label, 'relx': 0.0065, 'rely': 0.0065})
+        help_icon_label.bind("<Button-1>", lambda e: help_explanation("This is your dashboard where you can manage your business plans."))
         
         help_icon_label = CTkLabel(self, text="", image=question_mark_ctk_image)
         help_icon_label.place(relx=0.6, rely=0.13)
+        self.help_icons.append({'icon': help_icon_label, 'relx': 0.6, 'rely': 0.13})
         help_icon_label.bind("<Button-1>", lambda e: help_explanation("Click here to create a new business plan."))
         
         help_icon_label = CTkLabel(self, text="", image=question_mark_ctk_image)
         help_icon_label.place(relx=0.80, rely=0.017799)
+        self.help_icons.append({'icon': help_icon_label, 'relx': 0.80, 'rely': 0.017799})
         help_icon_label.bind("<Button-1>", lambda e: help_explanation("Use this dropdown to navigate to different sections of the app."))
-
+        
         help_icon_label = CTkLabel(self, text="", image=question_mark_ctk_image)
         help_icon_label.place(relx=0.7283, rely=0.208)
+        self.help_icons.append({'icon': help_icon_label, 'relx': 0.7283, 'rely': 0.208})
         help_icon_label.bind("<Button-1>", lambda e: help_explanation("Search for your business plans here."))
-
+        
         help_icon_label = CTkLabel(self, text="", image=question_mark_ctk_image)
         help_icon_label.place(relx=0.7283, rely=0.8439)
+        self.help_icons.append({'icon': help_icon_label, 'relx': 0.7283, 'rely': 0.8439})
         help_icon_label.bind("<Button-1>", lambda e: help_explanation("Navigate through pages of your business plans using these buttons."))
+        
+        # Initially hide help icons if tutorial is disabled.
+        if not self.tutorial_enabled:
+            self.update_help_icons()
 
     
     
@@ -139,6 +157,8 @@ class Dashboard(CTkFrame):
             self.show_profile() # Handle profile action if needed
         elif selected_option == "New plan":
             self.open_business_plan_form() # Call the functio nto create a new business plan
+        elif selected_option == "Disable Tutorial":
+            self.toggle_tutorial()
         elif selected_option == "Settings":
             self.show_settings() # Handle settings action if needed
         elif selected_option == "Log Out":
@@ -164,6 +184,42 @@ class Dashboard(CTkFrame):
         '''Navigating to the user profile'''
         print(f"Showing profile for {self.username}")
         # The profile view is not yet implemented
+    
+    def toggle_tutorial(self):
+        ''' Toggle the visibility of the tutorial help-icons (the question marks)'''
+        
+        if not hasattr(self, 'help_icons'):
+            self.add_help_icons()
+            
+        self.tutorial_enabled = not self.tutorial_enabled
+        print(f"Tutorial enabled: {self.tutorial_enabled}")
+        
+        self.update_help_icons()
+        
+        # Update dropdown Tutorial label
+        if self.tutorial_enabled:
+            self.dropdown_menu.set("Disable Tutorial")
+        else:
+            self.dropdown_menu.set("Enable Tutorial")
+    
+    def update_help_icons(self):
+        ''' Update the visibility of the help icons based on tutorial state.'''
+        
+        if self.tutorial_enabled:
+            for icon_info in self.help_icons:
+                icon_info['icon'].place(
+                    relx=icon_info['relx'], 
+                    rely=icon_info['rely']
+                    )
+                # help_icon = icon_info['icon']
+                # relx = icon_info['relx']
+                # rely = icon_info['rely']
+                # help_icon.place(relx=relx, rely=rely)
+            print("Help icons visible: True")
+        else:
+            for icon_info in self.help_icons:
+                icon_info['icon'].place_forget() # Hide the icons
+        print("Help icons visible: False")
     
     def show_settings(self):
         '''Navigate to the settings page'''
