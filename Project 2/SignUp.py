@@ -1,5 +1,6 @@
 from customtkinter import *
 from PIL import Image, ImageDraw, ImageOps
+from email_validator import validate_email, EmailNotValidError
 import sqlite3
 import bcrypt 
 import database
@@ -14,6 +15,7 @@ class SignUp(CTkFrame):
 
     def create_widgets(self):
         self.widget_welcome_section()
+        self.widget_email_section()
         self.widget_username_section()
         self.widget_password_section()
         self.widget_sign_up_button()
@@ -42,30 +44,51 @@ class SignUp(CTkFrame):
         image = CTkImage(light_image=rounded_image, size=(350, 475))  
 
         self.image_label = CTkLabel(master=self, image=image, text="")  
-        self.image_label.place(relx=0.26, rely=0.51, anchor="center")   
+        self.image_label.place(relx=0.26, rely=0.52, anchor="center")   
 
     
     def widget_welcome_section(self):
         # Welcome Label
         self.welcome_label = CTkLabel(master=self, text="Welcome to Thunder", font=("Arial", 30))
-        self.welcome_label.place(relx=0.7, rely=0.1, anchor="center")
+        self.welcome_label.place(relx=0.7, rely=0.089, anchor="center")
 
         # Description label
         self.description_label = CTkLabel(master=self, text="This is a description", font=("Arial", 14), text_color="grey")
-        self.description_label.place(relx=0.7, rely=0.15, anchor="center")
+        self.description_label.place(relx=0.7, rely=0.145, anchor="center")
+    
+    def widget_email_section(self):
+        # Email label
+        self.email_label = CTkLabel(master=self, text="Email")
+        self.email_label.place(relx=0.536, rely=0.16)
+        
+        # Asterisk for email
+        self.email_asterisk = CTkLabel(master=self, text='*', text_color="red")
+        self.email_asterisk.place(relx=0.58, rely=0.16)
+        
+        # Email entry
+        self.email_entry = CTkEntry(master=self, placeholder_text="Email", width=300)
+        self.email_entry.place(relx=0.7, rely=0.22, anchor="center")
+        
+        # Email requirements
+        self.email_requirements = CTkLabel(
+            master=self,
+            text="Enter a valid email address.",
+            text_color="grey"
+        )
+        self.email_requirements.place(relx=0.536, rely=0.25)
 
     def widget_username_section(self):
         # Username label
         self.username_label = CTkLabel(master=self, text='Username')
-        self.username_label.place(relx=0.536, rely=0.22)
+        self.username_label.place(relx=0.536, rely=0.30)
 
         # Asterisk for username
         self.username_asterisk = CTkLabel(master=self, text='*', text_color="red")
-        self.username_asterisk.place(relx=0.61, rely=0.22)
+        self.username_asterisk.place(relx=0.61, rely=0.30)
 
         # Username entry
         self.username_entry = CTkEntry(master=self, placeholder_text="Username", width=300)
-        self.username_entry.place(relx=0.7, rely=0.28, anchor="center")
+        self.username_entry.place(relx=0.7, rely=0.36, anchor="center")
 
         # Username requirements
         self.username_requirements = CTkLabel(
@@ -73,20 +96,20 @@ class SignUp(CTkFrame):
             text="Choose a unique username.",
             text_color="grey"
         )
-        self.username_requirements.place(relx=0.536, rely=0.303)
+        self.username_requirements.place(relx=0.536, rely=0.383)
 
     def widget_password_section(self):
         # Password label
         self.password_label = CTkLabel(master=self, text="Password")
-        self.password_label.place(relx=0.536, rely=0.38)
+        self.password_label.place(relx=0.536, rely=0.44)
 
         # Asterisk for password
         self.password_asterisk = CTkLabel(master=self, text='*', text_color="red")
-        self.password_asterisk.place(relx=0.605, rely=0.38)
+        self.password_asterisk.place(relx=0.605, rely=0.44)
 
         # Password entry
         self.password_entry = CTkEntry(master=self, placeholder_text="Password", show="*", width=300)
-        self.password_entry.place(relx=0.7, rely=0.44, anchor="center")
+        self.password_entry.place(relx=0.7, rely=0.50, anchor="center")
 
         # Password requirements
         self.password_requirements = CTkLabel(
@@ -96,19 +119,19 @@ class SignUp(CTkFrame):
             text_color="grey",
             width=300
         )
-        self.password_requirements.place(relx=0.497, rely=0.489, anchor='w')
+        self.password_requirements.place(relx=0.497, rely=0.549, anchor='w')
 
         # Confirm Password Label
         self.confirm_password_label = CTkLabel(master=self, text="Confirm Password")
-        self.confirm_password_label.place(relx=0.536, rely=0.54)
+        self.confirm_password_label.place(relx=0.536, rely=0.59)
 
         # Asterisk for confirm password
         self.confirm_password_asterisk = CTkLabel(master=self, text='*', text_color="red")
-        self.confirm_password_asterisk.place(relx=0.665, rely=0.54)
+        self.confirm_password_asterisk.place(relx=0.665, rely=0.59)
 
         # Confirm Password entry
         self.confirm_password_entry = CTkEntry(master=self, placeholder_text="Confirm Password", show="*", width=300)
-        self.confirm_password_entry.place(relx=0.7, rely=0.60, anchor="center")
+        self.confirm_password_entry.place(relx=0.7, rely=0.65, anchor="center")
 
         # Confirm Password requirements
         self.confirm_password_requirements = CTkLabel(
@@ -116,21 +139,21 @@ class SignUp(CTkFrame):
             text="Enter the same Password as before",
             text_color="grey"
         )
-        self.confirm_password_requirements.place(relx=0.536, rely=0.649, anchor="w")
+        self.confirm_password_requirements.place(relx=0.536, rely=0.699, anchor="w")
 
     def widget_sign_up_button(self):
         # Sign Up button
         self.sign_up_button = CTkButton(master=self, text="Sign Up", width=300, height=30, command=self.sign_up)
-        self.sign_up_button.place(relx=0.7, rely=0.745, anchor="center")
+        self.sign_up_button.place(relx=0.7, rely=0.755, anchor="center")
 
     def widget_alternative_sign_up_button(self):
         # Alternative sign up Google button
         self.continue_google_button = CTkButton(master=self, text="Continue With Google", width=300, height=30)
-        self.continue_google_button.place(relx=0.7, rely=0.813, anchor="center")
+        self.continue_google_button.place(relx=0.7, rely=0.823, anchor="center")
 
     def widget_return_to_sign_in_button(self):
         self.return_button = CTkButton(master=self, text="Back to Sign In", width=300, height=30, command=self.return_to_sign_in)
-        self.return_button.place(relx=0.7, rely=0.881, anchor="center")  # Adjust position as needed
+        self.return_button.place(relx=0.7, rely=0.891, anchor="center")  # Adjust position as needed
     
 
     def reset_form(self):
@@ -153,6 +176,7 @@ class SignUp(CTkFrame):
         self.main_app.show_signin()  # Call the main app's method to show the SignIn screen
 
     def sign_up(self):
+        email = self.email_entry.get()
         username = self.username_entry.get()
         password = self.password_entry.get()
         confirm_password = self.confirm_password_entry.get()
@@ -160,18 +184,30 @@ class SignUp(CTkFrame):
         # Error handling labels
         def error_message(label, message):
             label.configure(text=message)
-            label.place(relx=0.7, rely=0.7526, anchor="center")
+            label.place(relx=0.7, rely=0.95, anchor="center")
         
         # Validate inputs
         if not hasattr(self, 'error_label'):
             self.error_label = CTkLabel(master=self, text="", text_color = "red")
             
+        # Validation of email with email-validator library
+        try:
+            validate_email(email)
+        except EmailNotValidError as e:
+            error_message(self.error_label, f"Invalid email: {str(e)}")
+            return
+            
+        # Previous version of email validation
+        # if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", email):
+        #     error_message(self.error_label, "Invalid email address!")
+        #     return
+            
         if not re.match("^[A-Za-z0-9@.+-_]{1,150}$", username):
             self.error_label.configure(text="Not all Username requirements are met!")
-            self.error_label.place(relx=0.7, rely=0.7526, anchor="center")
+            self.error_label.place(relx=0.7, rely=0.95, anchor="center")
             return
         
-        if not username or not password or not confirm_password:
+        if not email or not username or not password or not confirm_password:
             error_message(self.error_label, " All fields are required!")
             return
         
@@ -185,10 +221,19 @@ class SignUp(CTkFrame):
         
         else:
             self.error_label.place_forget()
-            
-        # Check if the username already exists
+        
         conn = sqlite3.connect('thunder.db')
         cursor = conn.cursor()
+        
+        # Check if the email already exists
+        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+        if cursor.fetchone():
+            error_message(self.error_label, "Email already exists!")
+            cursor.close()
+            conn.close()
+            return
+        
+        # Check if the username already exists
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
         if cursor.fetchone(): # When result is found, username exits
             error_message(self.error_label, "Username already exists. Please choose another one.")
@@ -203,9 +248,13 @@ class SignUp(CTkFrame):
         # Convert hashed password to string
         hashed_password_str = hashed_password.decode('utf-8')  # Convert bytes to string
 
-        # Call the create_user function to insert into the database
-        database.create_user(username, hashed_password_str)  # Pass the string
+        # Insert the new user to database
+        cursor.execute(
+            "INSERT INTO users (email, username, password) VALUES (?, ?, ?)",
+            (email, username, hashed_password_str)
+        )
         
+        conn.commit()    
         cursor.close()
         conn.close()
         
@@ -215,7 +264,7 @@ class SignUp(CTkFrame):
             text="Account created successfully.",
             text_color="green"
         )
-        self.account_created_message.place(relx=0.7, rely=0.7526, anchor="center")
+        self.account_created_message.place(relx=0.7, rely=0.95, anchor="center")
         
         self.after(2000, self.return_to_sign_in)
         

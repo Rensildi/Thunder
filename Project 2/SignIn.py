@@ -17,7 +17,8 @@ class SignIn(CTkFrame):
 
     def create_widgets(self):
         self.widget_welcome_section()
-        self.widget_username_section()
+        self.widget_email_section()
+        # self.widget_username_section() replaced widget_username_section() with widget_email_section()
         self.widget_password_section()
         self.widget_sign_in_button()
         self.widget_sign_up_button()
@@ -61,14 +62,14 @@ class SignIn(CTkFrame):
         description_label = CTkLabel(master=self, text="This is a description", font=("Arial", 14), text_color="grey")
         description_label.place(relx=0.7, rely=0.15, anchor="center")
 
-    def widget_username_section(self):
-        # Username label
-        self.username_label = CTkLabel(master=self, text='Username')
-        self.username_label.place(relx=0.536, rely=0.22)
+    def widget_email_section(self):
+        # Email label
+        self.email_label = CTkLabel(master=self, text="Email")
+        self.email_label.place(relx=0.536, rely=0.22)
 
-        # Username entry
-        self.username_entry = CTkEntry(master=self, placeholder_text="Username", width=300)
-        self.username_entry.place(relx=0.7, rely=0.28, anchor="center")
+        # Email entry
+        self.email_entry = CTkEntry(master=self, placeholder_text="Email", width=300)
+        self.email_entry.place(relx=0.7, rely=0.28, anchor="center")
         
     def widget_password_section(self):
         # Password label
@@ -113,8 +114,12 @@ class SignIn(CTkFrame):
 
     def sign_in(self):
         # Implement sign-in functionality here
-        username = self.username_entry.get()
-        password = self.password_entry.get()
+        email = self.email_entry.get().strip()
+        password = self.password_entry.get().strip()
+        
+        if not email or not password:
+            self.update_console("Email and Password cannot be empty.")
+            return
         
         # Start the loading animation in a separate thread
         self.is_loading = True
@@ -125,31 +130,36 @@ class SignIn(CTkFrame):
         conn = sqlite3.connect('thunder.db')
         cursor = conn.cursor()
         
-        # Fetch user data
-        sql = "SELECT password FROM users WHERE username = ?"
-        cursor.execute(sql, (username,))
-        result = cursor.fetchone()
-        
-        # Check if username exists and password matches
-        if result:
-            hashed_password = result[0]  # Already a string now
-            if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):  # Convert string to bytes for comparison
-                self.update_console("")  # Clear any previous error messages
-                self.console_output.configure(text_color="green")  # Set text color to green for success message
-                self.update_console("You signed in successfully! Please wait a moment")
-                self.after(5000, self.show_dashboard, username)
+        try:
+            # Fetch user data
+            sql = "SELECT username, password FROM users WHERE email = ?"
+            cursor.execute(sql, (email,))
+            result = cursor.fetchone()
+            
+            # Check if email exists and password matches
+            if result:
+                username, hashed_password = result  # Already a string now
+                if hashed_password and hashed_password.startswith("$2b$"):
+                    if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):  # Convert string to bytes for comparison
+                        self.update_console("")  # Clear any previous error messages
+                        self.console_output.configure(text_color="green")  # Set text color to green for success message
+                        self.update_console("You signed in successfully! Please wait a moment")
+                        self.after(5000, self.show_dashboard, username)
+                    else:
+                        self.update_console("Email or Password may be incorrect or they do not exist.")
+                        self.is_loading = False # Preventing loading animation if the sign in is incorrect
+                        self.canvas.delete("all") # Clear the loading animation
+                else:
+                    self.update_console("Password hash in the database is invalid")
             else:
-                self.update_console("Username or Password may be incorrect or they do not exist.")
+                self.update_console("Email or Password may be incorrect or they do not exist.")
                 self.is_loading = False # Preventing loading animation if the sign in is incorrect
                 self.canvas.delete("all") # Clear the loading animation
-            
-        else:
-            self.update_console("Username or Password may be incorrect or they do not exist.")
-            self.is_loading = False # Preventing loading animation if the sign in is incorrect
-            self.canvas.delete("all") # Clear the loading animation
-            
-        cursor.close()
-        conn.close()
+        except Exception as e:
+            self.update_console(f"An error occurred: {e}")
+        finally:
+            cursor.close()
+            conn.close()
         print("Sign In button clicked")  # Placeholder for actual sign-in logic
 
     
@@ -194,7 +204,7 @@ class SignIn(CTkFrame):
         
     def reset_form(self):
         # Clear all input fields and reset error messages
-        self.username_entry.delete(0, "end")    # Clear the username
+        self.email_entry.delete(0, "end")    # Clear the username
         self.password_entry.delete(0, "end")    # Clear the password
         self.update_console("")                 # Clear console
         self.is_loading = False                 # Stop the loading circle
