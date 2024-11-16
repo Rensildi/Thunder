@@ -17,8 +17,8 @@ class SignIn(CTkFrame):
 
     def create_widgets(self):
         self.widget_welcome_section()
-        self.widget_email_section()
-        # self.widget_username_section() replaced widget_username_section() with widget_email_section()
+        self.widget_username_section()
+        # self.widget_username_section() replaced widget_username_section() with widget_username_section()
         self.widget_password_section()
         self.widget_sign_in_button()
         self.widget_sign_up_button()
@@ -26,6 +26,10 @@ class SignIn(CTkFrame):
         self.widget_alternative_sign_in_button()
         self.widget_image_section()
         
+        # Bind Enter key to sign in function for username and password fields
+        self.username_entry.bind("<Return>", self.on_enter_key_pressed)
+        self.password_entry.bind("<Return>", self.on_enter_key_pressed)
+
         # Create a Canvas for the circular loading animation
         self.canvas = CTkCanvas(self, width=30, height=30, bg="#2E2E2E", highlightthickness=0, bd=0)
         self.canvas.place(relx=0.7, rely=0.94, anchor="center")
@@ -62,14 +66,14 @@ class SignIn(CTkFrame):
         description_label = CTkLabel(master=self, text="This is a description", font=("Arial", 14), text_color="grey")
         description_label.place(relx=0.7, rely=0.15, anchor="center")
 
-    def widget_email_section(self):
-        # Email label
-        self.email_label = CTkLabel(master=self, text="Email")
-        self.email_label.place(relx=0.536, rely=0.22)
+    def widget_username_section(self):
+        # Username label
+        self.username_label = CTkLabel(master=self, text="Username")
+        self.username_label.place(relx=0.536, rely=0.22)
 
-        # Email entry
-        self.email_entry = CTkEntry(master=self, placeholder_text="Email", width=300)
-        self.email_entry.place(relx=0.7, rely=0.28, anchor="center")
+        # Username entry
+        self.username_entry = CTkEntry(master=self, placeholder_text="Username", width=300)
+        self.username_entry.place(relx=0.7, rely=0.28, anchor="center")
         
     def widget_password_section(self):
         # Password label
@@ -113,12 +117,12 @@ class SignIn(CTkFrame):
         self.main_app.show_signup()  # Call the main app's method to show the SignUp screen
 
     def sign_in(self):
-        # Implement sign-in functionality here
-        email = self.email_entry.get().strip()
+        """Sign the user into the application by checking for valid credentials"""
+        username = self.username_entry.get().strip()
         password = self.password_entry.get().strip()
         
-        if not email or not password:
-            self.update_console("Email and Password cannot be empty.")
+        if not username or not password:
+            self.update_console("Username and Password cannot be empty.")
             return
         
         # Start the loading animation in a separate thread
@@ -132,11 +136,11 @@ class SignIn(CTkFrame):
         
         try:
             # Fetch user data
-            sql = "SELECT username, password FROM users WHERE email = ?"
-            cursor.execute(sql, (email,))
+            sql = "SELECT username, password FROM users WHERE username = ?"
+            cursor.execute(sql, (username,))
             result = cursor.fetchone()
             
-            # Check if email exists and password matches
+            # Check if username exists and password matches
             if result:
                 username, hashed_password = result  # Already a string now
                 if hashed_password and hashed_password.startswith("$2b$"):
@@ -144,15 +148,15 @@ class SignIn(CTkFrame):
                         self.update_console("")  # Clear any previous error messages
                         self.console_output.configure(text_color="green")  # Set text color to green for success message
                         self.update_console("You signed in successfully! Please wait a moment")
-                        self.after(5000, self.show_dashboard, username)
+                        self.after(1000, self.show_dashboard, username)
                     else:
-                        self.update_console("Email or Password may be incorrect or they do not exist.")
+                        self.update_console("Username or Password may be incorrect or they do not exist.")
                         self.is_loading = False # Preventing loading animation if the sign in is incorrect
                         self.canvas.delete("all") # Clear the loading animation
                 else:
                     self.update_console("Password hash in the database is invalid")
             else:
-                self.update_console("Email or Password may be incorrect or they do not exist.")
+                self.update_console("Username or Password may be incorrect or they do not exist.")
                 self.is_loading = False # Preventing loading animation if the sign in is incorrect
                 self.canvas.delete("all") # Clear the loading animation
         except Exception as e:
@@ -162,7 +166,10 @@ class SignIn(CTkFrame):
             conn.close()
         print("Sign In button clicked")  # Placeholder for actual sign-in logic
 
-    
+    def on_enter_key_pressed(self, event):
+        """Trigger the sign in method when Enter key is pressed"""
+        self.sign_in()
+
     def update_circle(self):
         # Check if loading should continue
         if self.is_loading:
@@ -204,7 +211,7 @@ class SignIn(CTkFrame):
         
     def reset_form(self):
         # Clear all input fields and reset error messages
-        self.email_entry.delete(0, "end")    # Clear the username
+        self.username_entry.delete(0, "end")    # Clear the username
         self.password_entry.delete(0, "end")    # Clear the password
         self.update_console("")                 # Clear console
         self.is_loading = False                 # Stop the loading circle

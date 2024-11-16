@@ -328,8 +328,8 @@ class Dashboard(CTkFrame):
         business_plan_details = self.fetch_business_plan_details(business_name)
         
         if business_plan_details:
-            description, goals, target_audience = business_plan_details
-            plan_window = BusinessPlanForm(self, self.username, business_name, description, goals, target_audience)
+            description, mission_statement = business_plan_details
+            plan_window = BusinessPlanForm(self, self.username, business_name, description, mission_statement)
             plan_window.protocol("WM_DELETE_WINDOW", lambda: self.close_business_plan_window(plan_window))  
             self.open_windows.append(plan_window)  
         else:
@@ -341,7 +341,7 @@ class Dashboard(CTkFrame):
             conn = self.connect_db()  
             cursor = conn.cursor()
 
-            cursor.execute("""SELECT description, goals, target_audience FROM business_plans WHERE business_name = ?""", (business_name,))
+            cursor.execute("""SELECT description, mission_statement FROM executive_summary WHERE business_name = ?""", (business_name,))
             result = cursor.fetchone()
 
             if result:
