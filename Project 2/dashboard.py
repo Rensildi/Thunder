@@ -24,6 +24,8 @@ class Dashboard(CTkFrame):
         self.page_size = 8  # Number of plans per page
         self.current_page = 1  # Track the current page number
         
+        self.id, self.email = self.get_user_details()
+        
         # Tutorial feature
         self.tutorial_enabled = True # Default state of Tutorial
         
@@ -54,6 +56,7 @@ class Dashboard(CTkFrame):
             "Profile",
             "New plan",
             "Disable Tutorial",
+            "Feedback",
             "Settings",
             "Log Out"
         ]
@@ -99,6 +102,21 @@ class Dashboard(CTkFrame):
         self.notification_label.pack_forget() # By default notification is hidden
         
         self.add_help_icons()
+        
+    def get_user_details(self):
+        ''' Fetch user details'''
+        conn = sqlite3.connect("thunder.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, email FROM users WHERE username = ?", (self.username,))
+        user_details = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if user_details:
+            return user_details # Return user id and email
+        else:
+            print("User details not found!")
+            return None, None
     
     def add_help_icons(self):
         ''' Add the help icons (with their initial positions stored) '''
@@ -126,8 +144,8 @@ class Dashboard(CTkFrame):
         help_icon_label.bind("<Button-1>", lambda e: help_explanation("Search for your business plans here."))
         
         help_icon_label = CTkLabel(self, text="", image=question_mark_ctk_image)
-        help_icon_label.place(relx=0.7283, rely=0.8439)
-        self.help_icons.append({'icon': help_icon_label, 'relx': 0.7283, 'rely': 0.8439})
+        help_icon_label.place(relx=0.7283, rely=0.29)
+        self.help_icons.append({'icon': help_icon_label, 'relx': 0.7283, 'rely': 0.29})
         help_icon_label.bind("<Button-1>", lambda e: help_explanation("Navigate through pages of your business plans using these buttons."))
         
         # Initially hide help icons if tutorial is disabled.
@@ -159,6 +177,8 @@ class Dashboard(CTkFrame):
             self.open_business_plan_form() # Call the functio nto create a new business plan
         elif selected_option == "Disable Tutorial":
             self.toggle_tutorial()
+        elif selected_option == "Feedback":
+            self.open_feedback_window()
         elif selected_option == "Settings":
             self.show_settings() # Handle settings action if needed
         elif selected_option == "Log Out":
@@ -220,6 +240,12 @@ class Dashboard(CTkFrame):
             for icon_info in self.help_icons:
                 icon_info['icon'].place_forget() # Hide the icons
         print("Help icons visible: False")
+    
+    def open_feedback_window(self):
+        '''Open the feedback window.'''
+        from feedback import FeedbackForm
+        feedback_window = FeedbackForm(self, self.id, self.email, self.username)
+        feedback_window.mainloop()
     
     def show_settings(self):
         '''Navigate to the settings page'''

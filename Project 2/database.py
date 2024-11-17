@@ -14,7 +14,8 @@ def initialize_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE,
             username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
+            password TEXT NOT NULL,
+            sign_in_count INTEGER DEFAULT 0
         )
     ''')
 
