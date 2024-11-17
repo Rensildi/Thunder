@@ -6,6 +6,10 @@ import bcrypt
 import subprocess
 from dashboard import Dashboard
 import threading
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
 
 class SignIn(CTkFrame):
     def __init__(self, main_app):
@@ -99,9 +103,64 @@ class SignIn(CTkFrame):
 
     def widget_alternative_sign_in_button(self):
         # Continue with Google button
-        continue_google = CTkButton(master=self, text="Continue With Google")
+        continue_google = CTkButton(master=self, text="Continue With Google", command=self.sign_in_with_google)
         continue_google.configure(width=300, height=30)
         continue_google.place(relx=0.7, rely=0.8, anchor="center")
+    
+    def sign_in_with_google(self):
+        ''' Authenticate user using google OAuth. '''
+        self.update_console("Starting Google Sign-In...")
+        
+        # Define the OAuth scopes
+        SCOPES = [
+            'openid',
+            'https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/userinfo.email'
+        ]
+        
+        try:
+            # Run the Google OAuth flow
+            flow = InstalledAppFlow.from_client_secrets_file('client_secrets.json', SCOPES)
+            credentials = flow.run_local_server(port=8080)
+            
+            # Make an API call to retrieve the user's Google profile
+            service = build('people', 'v1', credentials=credentials)
+            profile = service.people().get(resourceName='people/me', personFields='names,emailAddresses').execute()
+            
+            email = profile['emailAddresses'][0]['value']
+            username = profile['names'][0]['displayName']
+            
+            # Process Google Sign-In or Sign-Up
+            self.process_google_signup(email, username)
+        except Exception as e:
+            self.update_console(f"Google Sign-In failed: {e}")
+            
+    def process_google_signup(self, email, username):
+        ''' Handle Google user authentication and registration. '''
+        # Connect to the database
+        conn = sqlite3.connect('thunder.db')
+        cursor = conn.cursor()
+        
+        try:
+            # Check if the user already exists
+            cursor.execute("SELECT username FROM users WHERE email = ?", (email,))
+            result = cursor.fetchone()
+            
+            if result:
+                # Existing user
+                self.update_console("Google Sign-In successful! Redirecting... ")
+                self.after(1000, self.show_dashboard, result[0])
+            else:
+                # New user, register them
+                cursor.execute("INSERT INTO users (email, username) VALUES (?, ?)", (email, username))
+                conn.commit()
+                self.update_console("Account created successfully with Google! Redirecting... ")
+                self.after(1000, self.show_dashboard, username)
+        except Exception as e:
+            self.update_console(f"An error occurred during Google Sign-In: {e}")
+        finally:
+            cursor.close()
+            conn.close()
 
     def widget_console_output(self):
         # Create a console output area

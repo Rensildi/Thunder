@@ -5,6 +5,10 @@ import sqlite3
 import bcrypt 
 import database
 import re
+import google.auth
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from dotenv import load_dotenv
 
 
 class SignUp(CTkFrame):
@@ -148,8 +152,80 @@ class SignUp(CTkFrame):
 
     def widget_alternative_sign_up_button(self):
         # Alternative sign up Google button
-        self.continue_google_button = CTkButton(master=self, text="Continue With Google", width=300, height=30)
+        self.continue_google_button = CTkButton(master=self, text="Continue With Google", width=300, height=30, command=self.sign_up_with_google)
         self.continue_google_button.place(relx=0.7, rely=0.823, anchor="center")
+    
+    def sign_up_with_google(self):
+        """Initiates Google OAuth flow using environment variables."""
+        SCOPES = ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email']
+
+        # Retrieve the path to the client secrets file from environment variables or a fixed location
+        google_client_secrets_file = os.getenv('GOOGLE_CLIENT_SECRETS_FILE') or 'client_secrets.json'
+
+        if not google_client_secrets_file:
+            print("Google client secrets file not found.")
+            return
+
+        try:
+            # Initialize the OAuth flow using the client secrets file
+            flow = InstalledAppFlow.from_client_secrets_file(google_client_secrets_file, SCOPES)
+            credentials = flow.run_local_server(port=8080)
+
+            # Use the credentials to build the service
+            service = build('people', 'v1', credentials=credentials)
+            profile = service.people().get(resourceName='people/me', personFields='names,emailAddresses').execute()
+
+            email = profile['emailAddresses'][0]['value']
+            username = profile['names'][0]['displayName']
+
+            self.process_google_signup(email, username)
+        except ValueError as e:
+            print(f"Error with client secrets format: {e}")
+        except Exception as e:
+            print(f"Error occurred while fetching Google user info: {e}")
+
+
+            
+    def process_google_signup(self, email, username):
+        """ Handles Google sign-up and user creation """
+        # Check if email already exists
+        conn = sqlite3.connect('thunder.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+        user = cursor.fetchone()
+
+        if user:
+            # User already exists, proceed to login
+            self.update_console(f"User with email {email} already exists. Logging in...")
+            self.sign_in_with_google(email)
+        else:
+            # New user, proceed with sign-up
+            self.create_new_user(email, username)
+
+        conn.close()
+    
+    def create_new_user(self, email, username):
+        """Creates a new user in the database with Google credentials"""
+        
+        # Insert the new user into the database (no need for password)
+        conn = sqlite3.connect('thunder.db')
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO users (email, username) VALUES (?, ?)", (email, username))
+        conn.commit()
+        conn.close()
+
+        self.update_console("Account created successfully! Logging you in now...")
+        self.sign_in_with_google(email)
+    
+    def sign_in_with_google(self, email):
+        """ Handle user login with Google credentials """
+        
+        # Proceed with sign-in
+        self.update_console(f"Signing in with Google account: {email}")
+    
+    def update_console(self, message):
+        self.console_output.configure(text=message)
+        
 
     def widget_return_to_sign_in_button(self):
         self.return_button = CTkButton(master=self, text="Back to Sign In", width=300, height=30, command=self.return_to_sign_in)

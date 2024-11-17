@@ -14,8 +14,10 @@ def initialize_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE,
             username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            sign_in_count INTEGER DEFAULT 0
+            password TEXT,
+            google_id TEXT UNIQUE,
+            sign_in_count INTEGER DEFAULT 0,
+            last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
 
