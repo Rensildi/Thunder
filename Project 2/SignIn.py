@@ -10,6 +10,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from database import resource_path
 
 class SignIn(CTkFrame):
     def __init__(self, main_app):
@@ -27,7 +28,7 @@ class SignIn(CTkFrame):
         self.widget_sign_in_button()
         self.widget_sign_up_button()
         self.widget_console_output()
-        self.widget_alternative_sign_in_button()
+        #self.widget_alternative_sign_in_button()
         self.widget_image_section()
         
         # Bind Enter key to sign in function for username and password fields
@@ -41,7 +42,7 @@ class SignIn(CTkFrame):
     def widget_image_section(self):
         """Add an image to the left side of the window"""
 
-        image_path = "images/thunder1.jpg"  
+        image_path = resource_path("images/thunder1.jpg")
         pil_image = Image.open(image_path).convert("RGBA")  # Ensure image has alpha channel for transparency
 
         # Set radius for rounded corners

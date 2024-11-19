@@ -26,7 +26,7 @@ class MainApp:
     def on_closing(self):
         # Shutting down the server if needed
         os.kill(os.getpid(), signal.SIGINT)
-        server_thread.join()  # Wait for server thread to finish
+        #server_thread.join()  # Wait for server thread to finish
         self.root.destroy()
 
     def show_signin(self):
@@ -37,6 +37,8 @@ class MainApp:
     def show_signup(self):
         self.sign_in_screen.pack_forget()  # Hide SignIn if it's open
         self.sign_up_screen.pack(fill='both', expand=True)  # Show SignUp
+
+    
 
 if __name__ == "__main__":
     app = MainApp()  # Create an instance of MainApp

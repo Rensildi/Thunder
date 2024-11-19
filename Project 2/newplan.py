@@ -1,5 +1,5 @@
 from customtkinter import CTkToplevel, CTkLabel, CTkEntry, CTkButton, CTkTextbox, CTkFrame, CTkScrollableFrame, CTkImage
-from database import insert_business_plan, update_business_plan, check_business_name_exists, get_business_plan_data, get_revenue_projection
+from database import insert_business_plan, update_business_plan, check_business_name_exists, get_business_plan_data, get_revenue_projection, get_market_share_projection
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -9,6 +9,7 @@ from pdf import BusinessPlanPDFGenerator
 from reportlab.pdfgen import canvas
 from PIL import Image, ImageTk
 from CTkMessagebox import CTkMessagebox
+from database import resource_path
 load_dotenv()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -44,8 +45,9 @@ model = genai.GenerativeModel(
 
 history = []
 
+
 # Load the question mark image
-question_mark_image = Image.open("images/help-icon.png")
+question_mark_image = Image.open(resource_path("images/help-icon.png"))
 question_mark_image = question_mark_image.resize((20, 20), Image.Resampling.LANCZOS)
 question_mark_ctk_image = CTkImage(light_image=question_mark_image, dark_image=question_mark_image, size=(20, 20))
 
@@ -365,189 +367,208 @@ class BusinessPlanForm(CTkToplevel):
         )
         self.competitors_entry = self.create_textbox(row=31, column=0, ht=100)
 
+        # Market Analysis
+        CTkLabel(self.scrollable_form_frame, text="Market Analysis:", font=("Arial", 14)).grid(
+            row=32, column=0, sticky="w", padx=(5, 10), pady=10
+        )
+
+        self.market_analysis_frame = CTkFrame(self.scrollable_form_frame)
+        self.market_analysis_frame.grid(row=33, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+
+        self.competitor_entries = []
+        self.market_share_entries = []
+
+        # Add initial row
+        self.add_market_share_row()
+
+        # Add competitor button
+        CTkButton(
+            self.scrollable_form_frame, text="Add Competitor", command=self.add_market_share_row
+        ).grid(row=34, column=0, padx=5, pady=5, sticky="w")
+
         # Target audience
         label, help_icon = self.create_label_and_help(
             text="Target Audience:", 
-            row=32, 
+            row=35, 
             column=0, 
             help_text="What is your target audience? Are they local, regional, worldwide?", 
             help_explanation_func=self.help_explanation
         )
-        self.target_audience_entry = self.create_textbox(row=33, column=0, ht=100)
+        self.target_audience_entry = self.create_textbox(row=36, column=0, ht=100)
 
         # Company advantages
         label, help_icon = self.create_label_and_help(
             text="Company Advantages", 
-            row=34, 
+            row=37, 
             column=0, 
             help_text="What advantage might you have over your competition? What do you bring to the table?", 
             help_explanation_func=self.help_explanation
         )
-        self.advantages_entry = self.create_textbox(row=35, column=0, ht=100)
+        self.advantages_entry = self.create_textbox(row=38, column=0, ht=100)
 
         # Regulations
         label, help_icon = self.create_label_and_help(
             text="Regulations & Compliance:", 
-            row=36, 
+            row=39, 
             column=0, 
             help_text="Are there any industry-specific regulations you must adhere to? How do you plan to meet these standards?", 
             help_explanation_func=self.help_explanation
         )
-        self.compliance_entry = self.create_textbox(row=37, column=0, ht=100)
+        self.compliance_entry = self.create_textbox(row=40, column=0, ht=100)
 
         # Market Research Section
-        CTkLabel(self.scrollable_form_frame, text="Marketing Strategy", font=("Arial", 17, "bold")).grid(row=38, column=0, sticky="w", padx=(5, 10), pady=(10,5))
+        CTkLabel(self.scrollable_form_frame, text="Marketing Strategy", font=("Arial", 17, "bold")).grid(row=41, column=0, sticky="w", padx=(5, 10), pady=(10,5))
 
         # Growth Strategy
         label, help_icon = self.create_label_and_help(
             text="Growth Strategy:", 
-            row=39, 
+            row=42, 
             column=0, 
             help_text="Provide an overview of your growth strategy. How do you plan to expand, or do you plan to expand at all?", 
             help_explanation_func=self.help_explanation
         )
-        self.growth_strategy_entry = self.create_textbox(row=40, column=0, ht=100)
+        self.growth_strategy_entry = self.create_textbox(row=43, column=0, ht=100)
         
         # Marketing Budget
         label, help_icon = self.create_label_and_help(
             text="Marketing Budget:", 
-            row=41, 
+            row=44, 
             column=0, 
             help_text="What is your budget for marketing? Can it be broken down into muliple areas of spending? ", 
             help_explanation_func=self.help_explanation
         )
-        self.marketing_budget_entry = self.create_textbox(row=42, column=0, ht=100)
+        self.marketing_budget_entry = self.create_textbox(row=45, column=0, ht=100)
 
         # Advertising Plan
         label, help_icon = self.create_label_and_help(
             text="Advertising:", 
-            row=43, 
+            row=46, 
             column=0, 
             help_text="How do you plan to advertise? Television, online, word of mouth? Provide an overview of how you plan to let potential customers know about your business.", 
             help_explanation_func=self.help_explanation
         )
-        self.adverising_entry = self.create_textbox(row=44, column=0, ht=100)
+        self.adverising_entry = self.create_textbox(row=47, column=0, ht=100)
 
                 # Customer Interaction
         label, help_icon = self.create_label_and_help(
             text="Customer Interaction:", 
-            row=45, 
+            row=48, 
             column=0, 
             help_text="How do you plan to engage with your customer base? Social media, in-store, etc?", 
             help_explanation_func=self.help_explanation
         )
-        self.interaction_entry = self.create_textbox(row=46, column=0, ht=100)
+        self.interaction_entry = self.create_textbox(row=49, column=0, ht=100)
 
         # Retention
         label, help_icon = self.create_label_and_help(
             text="Customer Retention:", 
-            row=47, 
+            row=50, 
             column=0, 
             help_text="How will you retain customers? Community outreach? Email lists?", 
             help_explanation_func=self.help_explanation
         )
-        self.retention_entry = self.create_textbox(row=48, column=0, ht=100)
+        self.retention_entry = self.create_textbox(row=51, column=0, ht=100)
 
         # Financial Section
-        CTkLabel(self.scrollable_form_frame, text="Financial Information", font=("Arial", 17, "bold")).grid(row=49, column=0, sticky="w", padx=(5, 10), pady=(10,5))
+        CTkLabel(self.scrollable_form_frame, text="Financial Information", font=("Arial", 17, "bold")).grid(row=52, column=0, sticky="w", padx=(5, 10), pady=(10,5))
 
         # Bank
         label, help_icon = self.create_label_and_help(
             text="Bank:", 
-            row=50, 
+            row=53, 
             column=0, 
             help_text="Which bank will you use for your business accounts?", 
             help_explanation_func=self.help_explanation
         )
-        self.bank_entry = self.create_textbox(row=51, column=0, ht=100)
+        self.bank_entry = self.create_textbox(row=54, column=0, ht=100)
 
         # Accounting Firm
         label, help_icon = self.create_label_and_help(
             text="Accounting Firm:", 
-            row=52, 
+            row=55, 
             column=0, 
             help_text="Which accounting firm or professional will you use?", 
             help_explanation_func=self.help_explanation
         )
-        self.accounting_firm_entry = self.create_textbox(row=53, column=0, ht=100)
+        self.accounting_firm_entry = self.create_textbox(row=56, column=0, ht=100)
 
         # Financing Sought
         label, help_icon = self.create_label_and_help(
             text="Financing Sought:", 
-            row=54, 
+            row=57, 
             column=0, 
             help_text="How much financing are you seeking? What are the terms?", 
             help_explanation_func=self.help_explanation
         )
-        self.financing_entry = self.create_textbox(row=55, column=0, ht=100)
+        self.financing_entry = self.create_textbox(row=58, column=0, ht=100)
 
         # Profit/Loss Statement
         label, help_icon = self.create_label_and_help(
             text="Profit/Loss Statement:", 
-            row=56, 
+            row=59, 
             column=0, 
             help_text="Summarize your business's revenue, expenses, and profits over a given period. This helps evaluate financial performance and guide decision-making.", 
             help_explanation_func=self.help_explanation
         )
-        self.profit_loss_entry = self.create_textbox(row=57, column=0, ht=100)
+        self.profit_loss_entry = self.create_textbox(row=60, column=0, ht=100)
 
         # Break Even Analysis
         label, help_icon = self.create_label_and_help(
             text="Break Even Analysis:", 
-            row=58, 
+            row=61, 
             column=0, 
             help_text="Determine the point where your revenue matches your expenses, indicating when your business will start generating a profit.", 
             help_explanation_func=self.help_explanation
         )
-        self.break_even_entry = self.create_textbox(row=59, column=0, ht=100)
+        self.break_even_entry = self.create_textbox(row=62, column=0, ht=100)
 
         # Return on Investment (ROI)
         label, help_icon = self.create_label_and_help(
             text="Return on Investment (ROI):", 
-            row=60, 
+            row=63, 
             column=0, 
             help_text="What ROI are you expecting, and how will you measure it? Within what timeframe are investors expecting to make a profit?", 
             help_explanation_func=self.help_explanation
         )
-        self.roi_entry = self.create_textbox(row=61, column=0, ht=100)
+        self.roi_entry = self.create_textbox(row=64, column=0, ht=100)
 
         # Contingency Plan
         label, help_icon = self.create_label_and_help(
             text="Contingency Plan:", 
-            row=62, 
+            row=65, 
             column=0, 
             help_text="What is your plan if things go wrong? Backup resources?", 
             help_explanation_func=self.help_explanation
         )
-        self.contingency_entry = self.create_textbox(row=63, column=0, ht=100)
+        self.contingency_entry = self.create_textbox(row=66, column=0, ht=100)
 
         # Disaster Recovery Plan
         label, help_icon = self.create_label_and_help(
             text="Disaster Recovery Plan:", 
-            row=64, 
+            row=67, 
             column=0, 
             help_text="How will your business recover from disasters?", 
             help_explanation_func=self.help_explanation
         )
-        self.disaster_recovery_entry = self.create_textbox(row=65, column=0, ht=100)
+        self.disaster_recovery_entry = self.create_textbox(row=68, column=0, ht=100)
 
         # Insurance Information
         label, help_icon = self.create_label_and_help(
             text="Insurance Information:", 
-            row=66, 
+            row=69, 
             column=0, 
             help_text="What insurance coverage does your business have or need?", 
             help_explanation_func=self.help_explanation
         )
-        self.insurance_entry = self.create_textbox(row=67, column=0, ht=100)
+        self.insurance_entry = self.create_textbox(row=70, column=0, ht=100)
 
         # Revenue Projection Section
         CTkLabel(self.scrollable_form_frame, text="Revenue Projection:", font=("Arial", 14)).grid(
-            row=68, column=0, sticky="w", padx=(5, 10), pady=10
+            row=71, column=0, sticky="w", padx=(5, 10), pady=10
         )
 
         self.revenue_projection_frame = CTkFrame(self.scrollable_form_frame)
-        self.revenue_projection_frame.grid(row=69, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.revenue_projection_frame.grid(row=72, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
 
         self.year_entries = []
         self.revenue_entries = []
@@ -559,61 +580,61 @@ class BusinessPlanForm(CTkToplevel):
         # Add Year Button
         CTkButton(
             self.scrollable_form_frame, text="Add Year", command=self.add_revenue_row
-        ).grid(row=70, column=0, padx=5, pady=5, sticky="w")
+        ).grid(row=73, column=0, padx=5, pady=5, sticky="w")
 
         # Legal Section
-        CTkLabel(self.scrollable_form_frame, text="Legal Information", font=("Arial", 17, "bold")).grid(row=71, column=0, sticky="w", padx=(5, 10), pady=(10,5))
+        CTkLabel(self.scrollable_form_frame, text="Legal Information", font=("Arial", 17, "bold")).grid(row=74, column=0, sticky="w", padx=(5, 10), pady=(10,5))
 
         # Law Firm
         label, help_icon = self.create_label_and_help(
             text="Law Firm:", 
-            row=72, 
+            row=75, 
             column=0, 
             help_text="Which law firm or legal professional will handle your business's legal needs, such as contracts, compliance, or disputes?", 
             help_explanation_func=self.help_explanation
         )
-        self.law_firm_entry = self.create_textbox(row=73, column=0, ht=100)
+        self.law_firm_entry = self.create_textbox(row=76, column=0, ht=100)
 
         # Intellectual Property
         label, help_icon = self.create_label_and_help(
             text="Intellectual Property:", 
-            row=74, 
+            row=77, 
             column=0, 
             help_text="Detail any patents, trademarks, copyrights, or trade secrets that protect your business's products, services, or brand.", 
             help_explanation_func=self.help_explanation
         )
-        self.intellectual_property_entry = self.create_textbox(row=75, column=0, ht=100)
+        self.intellectual_property_entry = self.create_textbox(row=78, column=0, ht=100)
 
         # Contact Info Section
-        CTkLabel(self.scrollable_form_frame, text="Contact Information", font=("Arial", 17, "bold")).grid(row=76, column=0, sticky="w", padx=(5, 10), pady=(10,5))
+        CTkLabel(self.scrollable_form_frame, text="Contact Information", font=("Arial", 17, "bold")).grid(row=79, column=0, sticky="w", padx=(5, 10), pady=(10,5))
 
         # Name
-        label = self.create_label(text="Name:", row=77, column=0)
-        self.contact_name_entry = self.create_textbox(row=78, column=0, ht=100)
+        label = self.create_label(text="Name:", row=80, column=0)
+        self.contact_name_entry = self.create_textbox(row=81, column=0, ht=100)
 
         # Address
-        label = self.create_label(text="Address:", row=79, column=0)
-        self.address_entry = self.create_textbox(row=80, column=0, ht=100)
+        label = self.create_label(text="Address:", row=82, column=0)
+        self.address_entry = self.create_textbox(row=83, column=0, ht=100)
 
         # City
-        label = self.create_label(text="City:", row=81, column=0)
-        self.city_entry = self.create_textbox(row=82, column=0, ht=100)
+        label = self.create_label(text="City:", row=84, column=0)
+        self.city_entry = self.create_textbox(row=85, column=0, ht=100)
 
         # State
-        label = self.create_label(text="State:", row=83, column=0)
-        self.state_entry = self.create_textbox(row=84, column=0, ht=100)
+        label = self.create_label(text="State:", row=86, column=0)
+        self.state_entry = self.create_textbox(row=87, column=0, ht=100)
 
         # Zip
-        label = self.create_label(text="Zip:", row=85, column=0)
-        self.zip_entry = self.create_textbox(row=86, column=0, ht=100)
+        label = self.create_label(text="Zip:", row=88, column=0)
+        self.zip_entry = self.create_textbox(row=89, column=0, ht=100)
 
         # Phone
-        label = self.create_label(text="Phone:", row=87, column=0)
-        self.phone_entry = self.create_textbox(row=88, column=0, ht=100)
+        label = self.create_label(text="Phone:", row=90, column=0)
+        self.phone_entry = self.create_textbox(row=91, column=0, ht=100)
 
         # Email
-        label = self.create_label(text="Email:", row=89, column=0)
-        self.email_entry = self.create_textbox(row=90, column=0, ht=100)
+        label = self.create_label(text="Email:", row=92, column=0)
+        self.email_entry = self.create_textbox(row=93, column=0, ht=100)
 
      
         
@@ -785,189 +806,213 @@ class BusinessPlanForm(CTkToplevel):
         )
         self.competitors_entry = self.edit_textbox(row=31, column=0, ht=100, default_value=competitors)
 
+        # Market Analysis
+        CTkLabel(self.scrollable_form_frame, text="Market Analysis:", font=("Arial", 14)).grid(
+            row=32, column=0, sticky="w", padx=(5, 10), pady=10
+        )
+
+        self.market_analysis_frame = CTkFrame(self.scrollable_form_frame)
+        self.market_analysis_frame.grid(row=33, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+
+        self.competitor_entries = []
+        self.market_share_entries = []
+
+        # Get existing market data
+        market_data = get_market_share_projection(self.username, self.original_business_name)
+
+        # Populate with existing market data
+        for competitor, market_share in market_data:
+            self.add_market_share_row(competitor=str(competitor), market_share=str(market_share))
+
+        self.add_market_share_row()
+        # Add competitor button
+        CTkButton(
+            self.scrollable_form_frame, text="Add Competitor", command=self.add_market_share_row
+        ).grid(row=34, column=0, padx=5, pady=5, sticky="w")
+
         # Target Audience Section
         label, help_icon = self.create_label_and_help(
             text="Target Audience:", 
-            row=32, 
+            row=35, 
             column=0, 
             help_text="What is your target audience? Are they local, regional, worldwide?", 
             help_explanation_func=self.help_explanation
         )
-        self.target_audience_entry = self.edit_textbox(row=33, column=0, ht=100, default_value=target_audience)
+        self.target_audience_entry = self.edit_textbox(row=36, column=0, ht=100, default_value=target_audience)
 
         # Company Advantages Section
         label, help_icon = self.create_label_and_help(
             text="Company Advantages", 
-            row=34, 
+            row=37, 
             column=0, 
             help_text="What advantage might you have over your competition? What do you bring to the table?", 
             help_explanation_func=self.help_explanation
         )
-        self.advantages_entry = self.edit_textbox(row=35, column=0, ht=100, default_value=company_advantages)
+        self.advantages_entry = self.edit_textbox(row=38, column=0, ht=100, default_value=company_advantages)
 
         # Regulations Section
         label, help_icon = self.create_label_and_help(
             text="Regulations & Compliance:", 
-            row=36, 
+            row=39, 
             column=0, 
             help_text="Are there any industry-specific regulations you must adhere to? How do you plan to meet these standards?", 
             help_explanation_func=self.help_explanation
         )
-        self.compliance_entry = self.edit_textbox(row=37, column=0, ht=100, default_value=regulations_compliance)
+        self.compliance_entry = self.edit_textbox(row=40, column=0, ht=100, default_value=regulations_compliance)
 
         # Marketing Strategy Section
-        CTkLabel(self.scrollable_form_frame, text="Marketing Strategy", font=("Arial", 17, "bold")).grid(row=38, column=0, sticky="w", padx=(5, 10), pady=(10,5))
+        CTkLabel(self.scrollable_form_frame, text="Marketing Strategy", font=("Arial", 17, "bold")).grid(row=41, column=0, sticky="w", padx=(5, 10), pady=(10,5))
 
         # Growth Strategy Section
         label, help_icon = self.create_label_and_help(
             text="Growth Strategy:", 
-            row=39, 
+            row=42, 
             column=0, 
             help_text="Provide an overview of your growth strategy. How do you plan to expand, or do you plan to expand at all?", 
             help_explanation_func=self.help_explanation
         )
-        self.growth_strategy_entry = self.edit_textbox(row=40, column=0, ht=100, default_value=growth_strategy)
+        self.growth_strategy_entry = self.edit_textbox(row=43, column=0, ht=100, default_value=growth_strategy)
 
         # Marketing Budget Section
         label, help_icon = self.create_label_and_help(
             text="Marketing Budget:", 
-            row=41, 
+            row=44, 
             column=0, 
             help_text="What is your budget for marketing? Can it be broken down into multiple areas of spending?", 
             help_explanation_func=self.help_explanation
         )
-        self.marketing_budget_entry = self.edit_textbox(row=42, column=0, ht=100, default_value=marketing_budget)
+        self.marketing_budget_entry = self.edit_textbox(row=45, column=0, ht=100, default_value=marketing_budget)
 
         # Advertising Plan Section
         label, help_icon = self.create_label_and_help(
             text="Advertising:", 
-            row=43, 
+            row=46, 
             column=0, 
             help_text="How do you plan to advertise? Television, online, word of mouth? Provide an overview of how you plan to let potential customers know about your business.", 
             help_explanation_func=self.help_explanation
         )
-        self.adverising_entry = self.edit_textbox(row=44, column=0, ht=100, default_value=advertising_plan)
+        self.adverising_entry = self.edit_textbox(row=47, column=0, ht=100, default_value=advertising_plan)
 
         # Customer Interaction Section
         label, help_icon = self.create_label_and_help(
             text="Customer Interaction:", 
-            row=45, 
+            row=48, 
             column=0, 
             help_text="How do you plan to engage with your customer base? Social media, in-store, etc?", 
             help_explanation_func=self.help_explanation
         )
-        self.interaction_entry = self.edit_textbox(row=46, column=0, ht=100, default_value=customer_interaction)
+        self.interaction_entry = self.edit_textbox(row=49, column=0, ht=100, default_value=customer_interaction)
 
         # Retention Section
         label, help_icon = self.create_label_and_help(
             text="Customer Retention:", 
-            row=47, 
+            row=50, 
             column=0, 
             help_text="How will you retain customers? Community outreach? Email lists?", 
             help_explanation_func=self.help_explanation
         )
-        self.retention_entry = self.edit_textbox(row=48, column=0, ht=100, default_value=customer_retention)
+        self.retention_entry = self.edit_textbox(row=51, column=0, ht=100, default_value=customer_retention)
 
         # Financial Information Section
-        CTkLabel(self.scrollable_form_frame, text="Financial Information", font=("Arial", 17, "bold")).grid(row=49, column=0, sticky="w", padx=(5, 10), pady=(10,5))
+        CTkLabel(self.scrollable_form_frame, text="Financial Information", font=("Arial", 17, "bold")).grid(row=52, column=0, sticky="w", padx=(5, 10), pady=(10,5))
 
         # Bank Section
         label, help_icon = self.create_label_and_help(
             text="Bank:", 
-            row=50, 
+            row=53, 
             column=0, 
             help_text="Which bank will you use for your business accounts?", 
             help_explanation_func=self.help_explanation
         )
-        self.bank_entry = self.edit_textbox(row=51, column=0, ht=100, default_value=bank)
+        self.bank_entry = self.edit_textbox(row=54, column=0, ht=100, default_value=bank)
 
         # Accounting Firm Section
         label, help_icon = self.create_label_and_help(
             text="Accounting Firm:", 
-            row=52, 
+            row=55, 
             column=0, 
             help_text="Which accounting firm or professional will you use?", 
             help_explanation_func=self.help_explanation
         )
-        self.accounting_firm_entry = self.edit_textbox(row=53, column=0, ht=100, default_value=accounting_firm)
+        self.accounting_firm_entry = self.edit_textbox(row=56, column=0, ht=100, default_value=accounting_firm)
 
         # Financing Sought Section
         label, help_icon = self.create_label_and_help(
             text="Financing Sought:", 
-            row=54, 
+            row=57, 
             column=0, 
             help_text="How much financing are you seeking? What are the terms?", 
             help_explanation_func=self.help_explanation
         )
-        self.financing_entry = self.edit_textbox(row=55, column=0, ht=100, default_value=financing_sought)
+        self.financing_entry = self.edit_textbox(row=58, column=0, ht=100, default_value=financing_sought)
 
         # Profit/Loss Statement Section
         label, help_icon = self.create_label_and_help(
             text="Profit/Loss Statement:", 
-            row=56, 
+            row=59, 
             column=0, 
             help_text="Summarize your business's revenue, expenses, and profits over a given period. This helps evaluate financial performance and guide decision-making.", 
             help_explanation_func=self.help_explanation
         )
-        self.profit_loss_entry = self.edit_textbox(row=57, column=0, ht=100, default_value=profit_loss_statement)
+        self.profit_loss_entry = self.edit_textbox(row=60, column=0, ht=100, default_value=profit_loss_statement)
 
         # Break Even Analysis Section
         label, help_icon = self.create_label_and_help(
             text="Break Even Analysis:", 
-            row=58, 
+            row=61, 
             column=0, 
             help_text="Determine the point where your revenue matches your expenses, indicating when your business will start generating a profit.", 
             help_explanation_func=self.help_explanation
         )
-        self.break_even_entry = self.edit_textbox(row=59, column=0, ht=100, default_value=break_even_analysis)
+        self.break_even_entry = self.edit_textbox(row=62, column=0, ht=100, default_value=break_even_analysis)
 
         # Return on Investment (ROI) Section
         label, help_icon = self.create_label_and_help(
             text="Return on Investment (ROI):", 
-            row=60, 
+            row=63, 
             column=0, 
             help_text="What ROI are you expecting, and how will you measure it? Within what timeframe are investors expecting to make a profit?", 
             help_explanation_func=self.help_explanation
         )
-        self.roi_entry = self.edit_textbox(row=61, column=0, ht=100, default_value=roi)
+        self.roi_entry = self.edit_textbox(row=64, column=0, ht=100, default_value=roi)
 
         # Contingency Plan Section
         label, help_icon = self.create_label_and_help(
             text="Contingency Plan:", 
-            row=62, 
+            row=65, 
             column=0, 
             help_text="What is your plan if things go wrong? Backup resources?", 
             help_explanation_func=self.help_explanation
         )
-        self.contingency_entry = self.edit_textbox(row=63, column=0, ht=100, default_value=contingency_plan)
+        self.contingency_entry = self.edit_textbox(row=66, column=0, ht=100, default_value=contingency_plan)
 
         # Disaster Recovery Plan Section
         label, help_icon = self.create_label_and_help(
             text="Disaster Recovery Plan:", 
-            row=64, 
+            row=67, 
             column=0, 
             help_text="How will your business recover from disasters?", 
             help_explanation_func=self.help_explanation
         )
-        self.disaster_recovery_entry = self.edit_textbox(row=65, column=0, ht=100, default_value=disaster_recovery_plan)
+        self.disaster_recovery_entry = self.edit_textbox(row=68, column=0, ht=100, default_value=disaster_recovery_plan)
 
         # Insurance Information Section
         label, help_icon = self.create_label_and_help(
             text="Insurance Information:", 
-            row=66, 
+            row=69, 
             column=0, 
             help_text="What insurance coverage does your business have or need?", 
             help_explanation_func=self.help_explanation
         )
-        self.insurance_entry = self.edit_textbox(row=67, column=0, ht=100, default_value=insurance_info)
+        self.insurance_entry = self.edit_textbox(row=70, column=0, ht=100, default_value=insurance_info)
 
         # Revenue Projection
         CTkLabel(self.scrollable_form_frame, text="Revenue Projection:", font=("Arial", 14)).grid(
-            row=68, column=0, sticky="w", padx=(5, 10), pady=10
+            row=71, column=0, sticky="w", padx=(5, 10), pady=10
         )
 
         self.revenue_projection_frame = CTkFrame(self.scrollable_form_frame)
-        self.revenue_projection_frame.grid(row=69, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+        self.revenue_projection_frame.grid(row=72, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
 
         self.year_entries = []
         self.revenue_entries = []
@@ -984,65 +1029,65 @@ class BusinessPlanForm(CTkToplevel):
         # Add Year Button
         CTkButton(
             self.scrollable_form_frame, text="Add Year", command=self.add_revenue_row
-        ).grid(row=70, column=0, padx=5, pady=5, sticky="w")
+        ).grid(row=73, column=0, padx=5, pady=5, sticky="w")
 
         # Legal Section
-        CTkLabel(self.scrollable_form_frame, text="Legal Information", font=("Arial", 17, "bold")).grid(row=71, column=0, sticky="w", padx=(5, 10), pady=(10,5))
+        CTkLabel(self.scrollable_form_frame, text="Legal Information", font=("Arial", 17, "bold")).grid(row=74, column=0, sticky="w", padx=(5, 10), pady=(10,5))
 
         # Law Firm
         label, help_icon = self.create_label_and_help(
             text="Law Firm:", 
-            row=72, 
+            row=75, 
             column=0, 
             help_text="Which law firm or legal professional will handle your business's legal needs, such as contracts, compliance, or disputes?", 
             help_explanation_func=self.help_explanation
         )
-        self.law_firm_entry = self.edit_textbox(row=73, column=0, ht=100, default_value=law_firm)
+        self.law_firm_entry = self.edit_textbox(row=76, column=0, ht=100, default_value=law_firm)
 
         # Intellectual Property
         label, help_icon = self.create_label_and_help(
             text="Intellectual Property:", 
-            row=74, 
+            row=77, 
             column=0, 
             help_text="Detail any patents, trademarks, copyrights, or trade secrets that protect your business's products, services, or brand.", 
             help_explanation_func=self.help_explanation
         )
-        self.intellectual_property_entry = self.edit_textbox(row=75, column=0, ht=100, default_value=intellectual_property)
+        self.intellectual_property_entry = self.edit_textbox(row=78, column=0, ht=100, default_value=intellectual_property)
 
         # Contact Info Section
-        CTkLabel(self.scrollable_form_frame, text="Contact Information", font=("Arial", 17, "bold")).grid(row=76, column=0, sticky="w", padx=(5, 10), pady=(10,5))
+        CTkLabel(self.scrollable_form_frame, text="Contact Information", font=("Arial", 17, "bold")).grid(row=79, column=0, sticky="w", padx=(5, 10), pady=(10,5))
 
         # Name
-        label = self.create_label(text="Name:", row=77, column=0)
-        self.contact_name_entry = self.edit_textbox(row=78, column=0, ht=100, default_value=name)
+        label = self.create_label(text="Name:", row=80, column=0)
+        self.contact_name_entry = self.edit_textbox(row=81, column=0, ht=100, default_value=name)
 
         # Address
-        label = self.create_label(text="Address:", row=79, column=0)
-        self.address_entry = self.edit_textbox(row=80, column=0, ht=100, default_value=address)
+        label = self.create_label(text="Address:", row=82, column=0)
+        self.address_entry = self.edit_textbox(row=83, column=0, ht=100, default_value=address)
 
         # City
-        label = self.create_label(text="City:", row=81, column=0)
-        self.city_entry = self.edit_textbox(row=82, column=0, ht=100, default_value=city)
+        label = self.create_label(text="City:", row=84, column=0)
+        self.city_entry = self.edit_textbox(row=85, column=0, ht=100, default_value=city)
 
         # State
-        label = self.create_label(text="State:", row=83, column=0)
-        self.state_entry = self.edit_textbox(row=84, column=0, ht=100, default_value=state)
+        label = self.create_label(text="State:", row=86, column=0)
+        self.state_entry = self.edit_textbox(row=87, column=0, ht=100, default_value=state)
 
         # Zip
-        label = self.create_label(text="Zip:", row=85, column=0)
-        self.zip_entry = self.edit_textbox(row=86, column=0, ht=100, default_value=zip_code)
+        label = self.create_label(text="Zip:", row=88, column=0)
+        self.zip_entry = self.edit_textbox(row=89, column=0, ht=100, default_value=zip_code)
 
         # Phone
-        label = self.create_label(text="Phone:", row=87, column=0)
-        self.phone_entry = self.edit_textbox(row=88, column=0, ht=100, default_value=phone)
+        label = self.create_label(text="Phone:", row=90, column=0)
+        self.phone_entry = self.edit_textbox(row=91, column=0, ht=100, default_value=phone)
 
         # Email
-        label = self.create_label(text="Email:", row=89, column=0)
-        self.email_entry = self.edit_textbox(row=90, column=0, ht=100, default_value=email)
+        label = self.create_label(text="Email:", row=92, column=0)
+        self.email_entry = self.edit_textbox(row=93, column=0, ht=100, default_value=email)
 
 
     def add_revenue_row(self, year="", revenue="", expenditure=""):
-        """Add a row for entering year and revenue data."""
+        """Add a row for entering year and revenue data"""
         row_frame = CTkFrame(self.revenue_projection_frame)
         row_frame.pack(fill="x", pady=5)
 
@@ -1063,6 +1108,25 @@ class BusinessPlanForm(CTkToplevel):
         if expenditure:
             expenditure_entry.insert(0, expenditure)
         self.expenditure_entries.append(expenditure_entry)
+
+    def add_market_share_row(self, competitor="", market_share=""):
+        """Add a row for entering competitor and market share data"""
+        row_frame = CTkFrame(self.market_analysis_frame)
+        row_frame.pack(fill="x", pady=5)
+
+        # Competitor entry
+        competitor_entry = CTkEntry(row_frame, placeholder_text="Competitor Name", width=250)
+        competitor_entry.pack(side="left", padx=5)
+        if competitor:
+            competitor_entry.insert(0, competitor)
+        self.competitor_entries.append(competitor_entry)
+
+        # Market share entry
+        market_share_entry = CTkEntry(row_frame, placeholder_text="Market Share (%)", width=150)
+        market_share_entry.pack(side="left", padx=5)
+        if market_share:
+            market_share_entry.insert(0, market_share)
+        self.market_share_entries.append(market_share_entry)
 
     def initialize_ai_chat(self):
         """Initialize the AI Chat section in ai_frame"""
@@ -1153,6 +1217,17 @@ class BusinessPlanForm(CTkToplevel):
 
         revenue_projection = [{"year": int(year), "revenue": int(revenue), "expenditure": int(expenditure)} for year, revenue, expenditure in zip(years, revenues, expenditures)]
 
+        # Collect market share data
+        main_competitors = [entry.get().strip() for entry in self.competitor_entries if entry.get().strip()]
+        market_shares = [entry.get().strip() for entry in self.market_share_entries if entry.get().strip().isdigit()]
+
+        if len(main_competitors) != len(market_shares):
+            CTkMessagebox(title="Error", message="Please enter valid competitor names and market shares!", icon="error")
+            return
+
+        market_analysis = [{"competitor": competitor, "market_share": int(market_share)} for competitor, market_share in zip(main_competitors, market_shares)]
+
+
         # Combine all data for submission
         data = {
             "username": self.username,
@@ -1212,7 +1287,10 @@ class BusinessPlanForm(CTkToplevel):
             "intellectual_property":intellectual_property,
 
             # Revenue projection
-            "revenue_projection":revenue_projection
+            "revenue_projection":revenue_projection,
+
+            # Market shares
+            "market_analysis":market_analysis
         }
         if self.original_business_name:
         # Update existing business plan

@@ -9,6 +9,7 @@ import google.auth
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
+from database import resource_path
 
 
 class SignUp(CTkFrame):
@@ -23,14 +24,14 @@ class SignUp(CTkFrame):
         self.widget_username_section()
         self.widget_password_section()
         self.widget_sign_up_button()
-        self.widget_alternative_sign_up_button()
+        #self.widget_alternative_sign_up_button()
         self.widget_return_to_sign_in_button()  
         self.widget_image_section()
 
     def widget_image_section(self):
         """Add an image to the left side of the window"""
 
-        image_path = "images/signup.jpg"  
+        image_path = resource_path("images/signup.jpg")
         pil_image = Image.open(image_path).convert("RGBA")  # Ensure image has alpha channel for transparency
 
         # Set radius for rounded corners
@@ -156,7 +157,7 @@ class SignUp(CTkFrame):
         self.continue_google_button.place(relx=0.7, rely=0.823, anchor="center")
     
     def sign_up_with_google(self):
-        """Initiates Google OAuth flow using environment variables."""
+        """ Initiates Google OAuth flow using environment variables. """
         SCOPES = ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email']
 
         # Retrieve the path to the client secrets file from environment variables or a fixed location
@@ -215,13 +216,13 @@ class SignUp(CTkFrame):
         conn.close()
 
         self.update_console("Account created successfully! Logging you in now...")
-        self.sign_in_with_google(email)
+        #self.sign_in_with_google(email)
     
-    def sign_in_with_google(self, email):
-        """ Handle user login with Google credentials """
+    """ def sign_in_with_google(self, email):
+        """ "Handle user login with Google credentials" """
         
         # Proceed with sign-in
-        self.update_console(f"Signing in with Google account: {email}")
+        self.update_console(f"Signing in with Google account: {email}") """
     
     def update_console(self, message):
         self.console_output.configure(text=message)

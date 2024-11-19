@@ -1,5 +1,7 @@
 # database.py
 import sqlite3
+import sys
+import os
 from datetime import datetime
 
 # Database connection and table setup
@@ -126,6 +128,15 @@ def initialize_db():
                         FOREIGN KEY (username, business_name) REFERENCES business_plans (username, business_name)
                         )
                     ''')
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS market_analysis (
+                        username TEXT NOT NULL,
+                        business_name TEXT NOT NULL,
+                        competitor TEXT NOT NULL,
+                        market_share INTEGER NOT NULL,
+                        FOREIGN KEY (username, business_name) REFERENCES business_plans (username, business_name)
+                    )
+                ''')
 
     conn.commit()
     conn.close()
@@ -155,6 +166,7 @@ def insert_business_plan(username, data):
     cursor = conn.cursor()
     try:
         # Insert into business_plans table
+        print("Business plans")
         cursor.execute('''
             INSERT INTO business_plans (username, business_name, industry, num_employees, legal_structure, date_created)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -167,6 +179,7 @@ def insert_business_plan(username, data):
             datetime.now().isoformat()
         ))
 
+        print("Executive Summary")
         cursor.execute('''
             INSERT INTO executive_summary (username, business_name, description, mission_statement, principal_members, future)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -179,6 +192,7 @@ def insert_business_plan(username, data):
             data["future"]
         ))
 
+        print("Market Research")
         cursor.execute('''
             INSERT INTO market_research (username, business_name, industry, competitors, target_audience, company_advantages, regulations)
             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -192,6 +206,7 @@ def insert_business_plan(username, data):
             data["regulations_compliance"]
         ))
 
+        print("Marketing Srategy")
         cursor.execute('''
             INSERT INTO marketing_strategy (username, business_name, growth_strategy, advertising, marketing_budget, customer_interaction, customer_retention)
             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -205,6 +220,7 @@ def insert_business_plan(username, data):
             data["customer_retention"]
         ))
 
+        print("Service Line")
         cursor.execute('''
             INSERT INTO service_line (username, business_name, products, services, pricing_structure, research_development)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -217,6 +233,7 @@ def insert_business_plan(username, data):
             data["research"]
         ))
 
+        print("Contact Info")
         cursor.execute('''
             INSERT INTO contact_information (username, business_name, contact_name, address, city, state, zip, phone, email)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -232,6 +249,7 @@ def insert_business_plan(username, data):
             data["email"],
         ))
 
+        print("Financial")
         cursor.execute('''
             INSERT INTO financial (username, business_name, financing_sought, profit_loss_statement, break_even_analysis, return_on_investment, contingency_plan, disaster_recovery, bank, accounting_firm, insurance_info)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -249,6 +267,7 @@ def insert_business_plan(username, data):
             data["insurance_info"]
         ))
 
+        print("Legal")
         cursor.execute('''
             INSERT INTO legal (username, business_name, intellectual_property, law_firm)
             VALUES (?, ?, ?, ?)
@@ -259,13 +278,21 @@ def insert_business_plan(username, data):
             data["law_firm"]
         ))
 
-
+        print("Revenue")
         # Insert revenue projections into revenue_projection table
         for projection in data["revenue_projection"]:
             cursor.execute('''
                 INSERT INTO revenue_projection (username, business_name, year, revenue, expenditure)
                 VALUES (?, ?, ?, ?, ?)
             ''', (username, data["business_name"], projection["year"], projection["revenue"], projection["expenditure"]))
+
+        print("Inserting market analysis data...")
+        # Insert market share data into market_analysis table
+        for analysis in data["market_analysis"]:
+            cursor.execute('''
+                INSERT INTO market_analysis (username, business_name, competitor, market_share)
+                VALUES (?, ?, ?, ?)
+            ''', (username, data["business_name"], analysis["competitor"], analysis["market_share"]))
 
         conn.commit()
     except sqlite3.Error as e:
@@ -404,6 +431,20 @@ def update_business_plan(original_business_name, data):
                 VALUES (?, ?, ?, ?, ?)
             ''', (data["username"], data["business_name"], projection["year"], projection["revenue"], projection["expenditure"]))
 
+        # Delete old market analysis data
+        cursor.execute('''
+            DELETE FROM market_analysis
+            WHERE username = ? AND business_name = ?
+        ''', (data["username"], original_business_name))
+
+        # Insert updated market analysis data
+        print("Inserting market analysis data...")
+        for analysis in data["market_analysis"]:
+            cursor.execute('''
+                INSERT INTO market_analysis (username, business_name, competitor, market_share)
+                VALUES (?, ?, ?, ?)
+            ''', (data["username"], data["business_name"], analysis["competitor"], analysis["market_share"]))
+
         conn.commit()
     except sqlite3.Error as e:
         print(f"Error updating business plan: {e}")
@@ -506,3 +547,25 @@ def get_revenue_projection(username, business_name):
         return cursor.fetchall()  # Returns a list of tuples [(year, revenue, expenditure), ...]
     finally:
         conn.close()
+
+def get_market_share_projection(username, business_name):
+    """Fetch market analysis data for a business plan."""
+    conn = sqlite3.connect("thunder.db")
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            SELECT competitor, market_share
+            FROM market_analysis
+            WHERE username = ? AND business_name = ?
+            ORDER BY competitor
+        ''', (username, business_name))
+        return cursor.fetchall()  # Returns a list of tuples [(competitor, market_share), ...]
+    finally:
+        conn.close()
+
+def resource_path(relative_path):
+    """Check path to images when running packaged application"""
+    # Check if running in a PyInstaller bundle
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)

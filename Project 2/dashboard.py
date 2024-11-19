@@ -5,9 +5,10 @@ import sqlite3
 from tkinter import messagebox
 from CTkMessagebox import CTkMessagebox
 from PIL import Image, ImageTk
+from database import resource_path
 import threading
 
-question_mark_image = Image.open("images/help-icon.png")
+question_mark_image = Image.open(resource_path("images/help-icon.png"))
 question_mark_image = question_mark_image.resize((20, 20), Image.Resampling.LANCZOS)
 question_mark_ctk_image = CTkImage(light_image=question_mark_image, dark_image=question_mark_image, size=(20, 20))
 

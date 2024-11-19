@@ -1,0 +1,13 @@
+        ('dashboard.py', '.'), 
+        ('.env', '.'), 
+        ('feedback.py', '.'), 
+        ('database.py', '.'), 
+        ('newplan.py', '.'), 
+        ('pdf.py', '.'), 
+        ('SignIn.py', '.'), 
+        ('SignUp.py', '.'),
+        ('progress_tracker.py', '.')
+
+        pyinstaller --onefile --add-data "images/*;images" main.py
+
+        pyinstaller main.spec

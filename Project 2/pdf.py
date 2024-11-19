@@ -5,6 +5,7 @@ from reportlab.lib import colors
 from reportlab.pdfgen import canvas
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from database import get_revenue_projection, get_market_share_projection
 
 class BusinessPlanPDFGenerator:
     def __init__(self, business_plan_data):
@@ -78,11 +79,18 @@ class BusinessPlanPDFGenerator:
         elements.append(Spacer(1, 12))
 
         # Sample graph just to test inserting in pdf
-        chart_image_stream = self.create_chart()
+        revenue_image_stream = self.create_revenue_chart()
 
         # Add graph to the pdf
-        chart_image = Image(chart_image_stream, width=300, height=200)
-        elements.append(chart_image)
+        revenue_image = Image(revenue_image_stream, width=300, height=200)
+        elements.append(revenue_image)
+
+        # Sample graph just to test inserting in pdf
+        market_image_stream = self.create_market_share_chart()
+
+        # Add graph to the pdf
+        market_image = Image(market_image_stream, width=300, height=200)
+        elements.append(market_image)
         
         # Create the pdf
         doc.build(elements)
@@ -187,24 +195,64 @@ class BusinessPlanPDFGenerator:
         return [title, body, Spacer(1, 12)]
 
 
-    def create_chart(self):
-        """Generate a simple bar chart and save it to a BytesIO buffer"""
-        # Sample data 
-        data = [20, 20, 25, 25, 10]
-        labels = ['Profit', 'Labor', 'Materials', 'Salaries', 'Overhead']
+    def create_revenue_chart(self):
+        """Create revenue/expenditures graph"""
+        username = self.business_plan_data['business_plans'][1]
+        business_name = self.business_plan_data['business_plans'][2]
+
+        revenue_data = get_revenue_projection(username, business_name)
         
-        fig, ax = plt.subplots()
-        ax.bar(labels, data, color="#0066CC")
-        ax.set_xlabel("Categories")
-        ax.set_ylabel("Values")
-        ax.set_title("Sample Business Data Chart")
-        
-        # Save chart to a BytesIO object so it can be put directly into a pdf
+        years = [row[0] for row in revenue_data]
+        revenue = [row[1] for row in revenue_data]
+        expenditure = [row[2] for row in revenue_data]
+
+        # Create plot
+        plt.figure(figsize=(10, 6))
+        plt.plot(years, revenue, marker='o', label="Revenue", color="green")
+        plt.plot(years, expenditure, marker='o', label="Expenditure", color="red")
+
+        # Scale axes
+        plt.xticks(range(min(years), max(years) + 1))  
+        max_value = max(max(revenue), max(expenditure))
+        plt.ylim(0, max_value * 1.1)  # Add margin
+
+        # Add labels
+        plt.title("Revenue and Expenditure Over Time")
+        plt.xlabel("Year")
+        plt.ylabel("Amount")
+        plt.legend()
+        plt.grid(True)
+
+        # Save to BytesIO
         img_stream = BytesIO()
         plt.savefig(img_stream, format='png')
         plt.close()
-        
-        # Set BytesIO stream
+        img_stream.seek(0)
+
+        return img_stream
+
+
+    def create_market_share_chart(self):
+        """Generate market share pie chart"""
+        username = self.business_plan_data['business_plans'][1]
+        business_name = self.business_plan_data['business_plans'][2]
+
+        market_data = get_market_share_projection(username, business_name)
+
+        competitors = [row[0] for row in market_data]
+        market_shares = [row[1] for row in market_data]
+
+        # Create the plot
+        plt.figure(figsize=(8, 6))
+        plt.pie(market_shares, labels=competitors, autopct='%1.1f%%', startangle=90)
+        plt.title("Market Share Distribution")
+        plt.axis('equal')
+
+        # Save to BytesIO
+        img_stream = BytesIO()
+        plt.savefig(img_stream, format='png')
+        plt.close()
         img_stream.seek(0)
         
         return img_stream
+
