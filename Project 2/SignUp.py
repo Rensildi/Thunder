@@ -10,6 +10,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
 from database import resource_path
+import os
 
 
 class SignUp(CTkFrame):
@@ -24,7 +25,7 @@ class SignUp(CTkFrame):
         self.widget_username_section()
         self.widget_password_section()
         self.widget_sign_up_button()
-        #self.widget_alternative_sign_up_button()
+        self.widget_alternative_sign_up_button()
         self.widget_return_to_sign_in_button()  
         self.widget_image_section()
 
@@ -161,9 +162,9 @@ class SignUp(CTkFrame):
         SCOPES = ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email']
 
         # Retrieve the path to the client secrets file from environment variables or a fixed location
-        google_client_secrets_file = os.getenv('GOOGLE_CLIENT_SECRETS_FILE') or 'client_secrets.json'
+        google_client_secrets_file = resource_path('client_secrets.json')
 
-        if not google_client_secrets_file:
+        if not os.path.exists(google_client_secrets_file):
             print("Google client secrets file not found.")
             return
 
@@ -218,11 +219,11 @@ class SignUp(CTkFrame):
         self.update_console("Account created successfully! Logging you in now...")
         #self.sign_in_with_google(email)
     
-    """ def sign_in_with_google(self, email):
+    def sign_in_with_google(self, email):
         """ "Handle user login with Google credentials" """
         
         # Proceed with sign-in
-        self.update_console(f"Signing in with Google account: {email}") """
+        self.update_console(f"Signing in with Google account: {email}")
     
     def update_console(self, message):
         self.console_output.configure(text=message)

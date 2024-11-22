@@ -11,6 +11,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from database import resource_path
+import os
 
 class SignIn(CTkFrame):
     def __init__(self, main_app):
@@ -28,7 +29,7 @@ class SignIn(CTkFrame):
         self.widget_sign_in_button()
         self.widget_sign_up_button()
         self.widget_console_output()
-        #self.widget_alternative_sign_in_button()
+        self.widget_alternative_sign_in_button()
         self.widget_image_section()
         
         # Bind Enter key to sign in function for username and password fields
@@ -109,28 +110,35 @@ class SignIn(CTkFrame):
         continue_google.place(relx=0.7, rely=0.8, anchor="center")
     
     def sign_in_with_google(self):
-        ''' Authenticate user using google OAuth. '''
+        """ Authenticate user using Google OAuth. """
         self.update_console("Starting Google Sign-In...")
-        
+
         # Define the OAuth scopes
         SCOPES = [
             'openid',
             'https://www.googleapis.com/auth/userinfo.profile',
             'https://www.googleapis.com/auth/userinfo.email'
         ]
-        
+
         try:
+            # Resolve the path to client_secrets.json
+            client_secrets_file = resource_path('client_secrets.json')
+
+            if not os.path.exists(client_secrets_file):
+                self.update_console("Google client secrets file not found.")
+                return
+
             # Run the Google OAuth flow
-            flow = InstalledAppFlow.from_client_secrets_file('client_secrets.json', SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(client_secrets_file, SCOPES)
             credentials = flow.run_local_server(port=8080)
-            
+
             # Make an API call to retrieve the user's Google profile
             service = build('people', 'v1', credentials=credentials)
             profile = service.people().get(resourceName='people/me', personFields='names,emailAddresses').execute()
-            
+
             email = profile['emailAddresses'][0]['value']
             username = profile['names'][0]['displayName']
-            
+
             # Process Google Sign-In or Sign-Up
             self.process_google_signup(email, username)
         except Exception as e:
@@ -196,25 +204,27 @@ class SignIn(CTkFrame):
         
         try:
             # Fetch user data
-            sql = "SELECT username, password FROM users WHERE email = ?"
+            sql = "SELECT username, password, sign_in_count FROM users WHERE email = ?"
             cursor.execute(sql, (email,))
             result = cursor.fetchone()
             
             # Check if email exists and password matches
             if result:
-                username, hashed_password = result  # Already a string now
-                if hashed_password and hashed_password.startswith("$2b$"):
-                    if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):  # Convert string to bytes for comparison
-                        self.update_console("")  # Clear any previous error messages
-                        self.console_output.configure(text_color="green")  # Set text color to green for success message
-                        self.update_console("You signed in successfully! Please wait a moment")
-                        self.after(1000, self.show_dashboard, username)
+                username, hashed_password, sign_in_count = result  # Already a string now
+                if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):  # Convert string to bytes for comparison
+                    self.update_console("")  # Clear any previous error messages
+                    self.console_output.configure(text_color="green")  # Set text color to green for success message
+                    self.update_console("You signed in successfully! Please wait a moment")
+                    #self.after(1000, self.show_dashboard, username)
+                    
+                    if sign_in_count == 0:
+                        self.after(1000, self.show_onboarding, username, email)
                     else:
-                        self.update_console("Email or Password may be incorrect or they do not exist.")
-                        self.is_loading = False # Preventing loading animation if the sign in is incorrect
-                        self.canvas.delete("all") # Clear the loading animation
+                        self.after(1000, self.show_dashboard, username)
                 else:
-                    self.update_console("Password hash in the database is invalid")
+                    self.update_console("Email or Password may be incorrect or they do not exist.")
+                    self.is_loading = False # Preventing loading animation if the sign in is incorrect
+                    self.canvas.delete("all") # Clear the loading animation
             else:
                 self.update_console("Email or Password may be incorrect or they do not exist.")
                 self.is_loading = False # Preventing loading animation if the sign in is incorrect
@@ -224,7 +234,33 @@ class SignIn(CTkFrame):
         finally:
             cursor.close()
             conn.close()
-        print("Sign In button clicked")  # Placeholder for actual sign-in logic
+        print("Sign In button clicked")  
+    
+    def show_onboarding(self, username, email):
+        self.reset_form()
+        self.hide()
+        
+        def go_to_next_screen2():
+            import onboarding_screen2
+            onboarding_screen2.run(self.main_app.root, go_to_next_screen3)
+        
+        def go_to_next_screen3():
+            ''' Transition to Onboarding Screen 3/ '''
+            import onboarding_screen3
+            onboarding_screen3.run(self.main_app.root, complete_onboarding)
+            
+            
+        def complete_onboarding():
+            conn = sqlite3.connect('thunder.db')
+            cursor = conn.cursor()
+            cursor.execute("UPDATE users SET sign_in_count = sign_in_count + 1 WHERE email = ?", (email,))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            self.show_dashboard(username)
+            
+        import onboarding_screen1
+        onboarding_screen1.run(self.main_app.root, go_to_next_screen2)
 
     def on_enter_key_pressed(self, event):
         """Trigger the sign in method when Enter key is pressed"""
