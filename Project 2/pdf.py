@@ -23,41 +23,30 @@ class BusinessPlanPDFGenerator:
         title_style.fontSize = 18
         title_style.leading = 22
 
+        # Define section style
+        section_style = ParagraphStyle(
+            name='Section',
+            parent=styles['Heading1'],
+            fontSize=16,
+            leading=22,
+            spaceBefore=12,
+            spaceAfter=12,
+        )
+
         # Paragraph with indentation
         normal_style = ParagraphStyle(name='Normal', fontSize=10, leading=12, spaceBefore=6, spaceAfter=6)
         normal_style.firstLineIndent = 20  # Indentation for body paragraphs
 
         # Title
-        title = Paragraph("Business Plan", title_style)
+        title_text = self.business_plan_data["business_plans"][2]
+        title = Paragraph(title_text, title_style)
         elements.append(title)
         elements.append(Spacer(1, 12))
 
         # Create sections
-        elements.extend(self.create_section("Industry", 3, normal_style))
-        elements.extend(self.create_section("Employees", 4, normal_style))
-        elements.extend(self.create_section("Legal Structure", 5, normal_style))
-        elements.extend(self.create_section("Description", 2, normal_style))
-        elements.extend(self.create_section("Mission Statement", 3, normal_style))
-        elements.extend(self.create_section("Principal Members", 4, normal_style))
-        elements.extend(self.create_section("Future", 5, normal_style))
-        
-        elements.extend(self.create_section("Industry State", 2, normal_style))
-        elements.extend(self.create_section("Competitors", 3, normal_style))
-        elements.extend(self.create_section("Target Audience", 4, normal_style))
-        elements.extend(self.create_section("Company Advantages", 5, normal_style))
-        elements.extend(self.create_section("Regulations Compliance", 6, normal_style))
-
-        elements.extend(self.create_section("Growth Strategy", 2, normal_style))
-        elements.extend(self.create_section("Advertising Plan", 3, normal_style))
-        elements.extend(self.create_section("Marketing Budget", 4, normal_style))
-        elements.extend(self.create_section("Customer Interaction", 5, normal_style))
-        elements.extend(self.create_section("Customer Retention", 6, normal_style))
-
-        elements.extend(self.create_section("Products", 2, normal_style))
-        elements.extend(self.create_section("Services", 3, normal_style))
-        elements.extend(self.create_section("Pricing", 4, normal_style))
-        elements.extend(self.create_section("Research", 5, normal_style))
-
+        section_title = "Contact Information"
+        elements.append(Paragraph(section_title, section_style))
+        elements.append(Spacer(1, 6))
         elements.extend(self.create_section("Name", 2, normal_style))
         elements.extend(self.create_section("Address", 3, normal_style))
         elements.extend(self.create_section("City", 4, normal_style))
@@ -65,7 +54,60 @@ class BusinessPlanPDFGenerator:
         elements.extend(self.create_section("Zip Code", 6, normal_style))
         elements.extend(self.create_section("Phone", 7, normal_style))
         elements.extend(self.create_section("Email", 8, normal_style))
+        elements.append(Spacer(1, 12))
 
+        section_title = "Executive Summary"
+        elements.append(Paragraph(section_title, section_style))
+        elements.append(Spacer(1, 6))
+        elements.extend(self.create_section("Industry", 3, normal_style))
+        elements.extend(self.create_section("Employees", 4, normal_style))
+        elements.extend(self.create_section("Legal Structure", 5, normal_style))
+        elements.extend(self.create_section("Description", 2, normal_style))
+        elements.extend(self.create_section("Mission Statement", 3, normal_style))
+        elements.extend(self.create_section("Principal Members", 4, normal_style))
+        elements.extend(self.create_section("Future", 5, normal_style))
+        elements.append(Spacer(1, 12))
+        
+        section_title = "Market Analysis"
+        elements.append(Paragraph(section_title, section_style))
+        elements.append(Spacer(1, 6))
+        elements.extend(self.create_section("Industry State", 2, normal_style))
+        elements.extend(self.create_section("Competitors", 3, normal_style))
+        elements.append(Spacer(1, 12))
+        # Sample graph just to test inserting in pdf
+        market_image_stream = self.create_market_share_chart()
+
+        # Add graph to the pdf
+        market_image = Image(market_image_stream, width=300, height=200)
+        elements.append(market_image)
+        elements.extend(self.create_section("Target Audience", 4, normal_style))
+        elements.extend(self.create_section("Company Advantages", 5, normal_style))
+        elements.extend(self.create_section("Regulations Compliance", 6, normal_style))
+        elements.append(Spacer(1, 12))
+
+        section_title = "Marketing Strategy"
+        elements.append(Paragraph(section_title, section_style))
+        elements.append(Spacer(1, 6))
+        elements.extend(self.create_section("Growth Strategy", 2, normal_style))
+        elements.extend(self.create_section("Advertising Plan", 3, normal_style))
+        elements.extend(self.create_section("Marketing Budget", 4, normal_style))
+        elements.extend(self.create_section("Customer Interaction", 5, normal_style))
+        elements.extend(self.create_section("Customer Retention", 6, normal_style))
+        elements.append(Spacer(1, 12))
+        
+        section_title = "Products and Services"
+        elements.append(Paragraph(section_title, section_style))
+        elements.append(Spacer(1, 6))
+        elements.extend(self.create_section("Products", 2, normal_style))
+        elements.extend(self.create_section("Services", 3, normal_style))
+        elements.extend(self.create_section("Pricing", 4, normal_style))
+        elements.extend(self.create_section("Research", 5, normal_style))
+        elements.append(Spacer(1, 12))
+
+        
+        section_title = "Financial Information"
+        elements.append(Paragraph(section_title, section_style))
+        elements.append(Spacer(1, 6))
         elements.extend(self.create_section("Financing Sought", 2, normal_style))
         elements.extend(self.create_section("Profit and Loss Statement", 3, normal_style))
         elements.extend(self.create_section("Break-even Analysis", 4, normal_style))
@@ -75,8 +117,8 @@ class BusinessPlanPDFGenerator:
         elements.extend(self.create_section("Bank", 8, normal_style))
         elements.extend(self.create_section("Accounting Firm", 9, normal_style))
         elements.extend(self.create_section("Insurance Info", 10, normal_style))
-
         elements.append(Spacer(1, 12))
+
 
         # Sample graph just to test inserting in pdf
         revenue_image_stream = self.create_revenue_chart()
@@ -85,12 +127,7 @@ class BusinessPlanPDFGenerator:
         revenue_image = Image(revenue_image_stream, width=300, height=200)
         elements.append(revenue_image)
 
-        # Sample graph just to test inserting in pdf
-        market_image_stream = self.create_market_share_chart()
-
-        # Add graph to the pdf
-        market_image = Image(market_image_stream, width=300, height=200)
-        elements.append(market_image)
+        
         
         # Create the pdf
         doc.build(elements)
