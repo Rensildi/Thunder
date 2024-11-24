@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thunder</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Banner Styles */
+         .banner {
+            background-image: url('images/thunder7.png'); 
+            background-size: cover; 
+            background-position: center; 
+            color: white;
+            padding: 60px;
+			height: 40px;			
+            text-align: center;
+        }
+
+        /* Navigation Styles */
+        nav {
+            background-color: #333;
+            overflow: hidden;
+        }
+
+        nav a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        /* Main Content Styles */
+        .content {
+            flex: 1;
+            text-align: center;
+            padding: 50px;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            width: 100%;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            text-align: left;
+        }
+
+        .modal-header {
+            background-image: url('images/thunder.png'); 
+            background-size: cover; 
+            background-position: center; 
+            color: white;
+            padding: 10px;
+        }
+
+        .modal-footer {
+            text-align: right;
+        }
+
+        .modal-footer button {
+            padding: 10px 20px;
+            background-color: #000;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .modal-footer button:hover {
+            background-color: #A9A9A9;
+        }
+		
+		.terms-container {
+			max-height: 300px; /* Set a max height for the scrollable area */
+			overflow-y: auto; /* Enable vertical scrolling */
+			padding: 10px;
+			border: 1px solid #ccc; /* Optional: add border */
+			margin-top: 15px; /* Add some space above */
+		}
+    </style>
+</head>
+<body>
+
+    <!-- Banner -->
+    <div class="banner">
+    </div>
+
+    <!-- Nav Bar -->
+    <nav>
+        <a href="#about" onclick="openAboutUs()">About Us</a>
+        <a href="#how-to-use" onclick="openInstInstructions()">How to Use</a>
+        <a href="#user-agreement" onclick="openModal()">User Agreement</a>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="content">
+        <p>Click the button below to download Thunder for free:</p>
+        <button onclick="openModal()">Download</button>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Thunder Inc. All rights reserved.</p>
+    </footer>
+
+    <!-- User Agreement -->
+    <div id="userAgreementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>User Agreement</h2>
+            </div>
+            <div class="modal-body">
+                <p>By downloading this software, you agree to the following terms and conditions.</p>
+				 <h2>Terms and Conditions</h2>
+				<div class="terms-container">
+					<h2>User Agreement</h2>
+					<p><b>PLEASE READ THIS AGREEMENT CAREFULLY BEFORE USING THIS APPLICATION.
+					BY ACCESSING, OR USING THIS APPLICATION, YOU AGREE TO BE BOUND BY THIS AGREEMENT. 
+					IF YOU DO NOT AGREE, DO NOT ACCESS OR USE THIS APPLICATION.</b></p>
+					<p>This User Agreement governs your use of the Thunder provided by Thunder Inc. 
+					and any related services. This Agreement sets forth the terms under which you may 
+					use the application, including policies regarding data privacy, application sharing, 
+					indemnification, and other legal matters.</p>
+					<h3>1. Data Privacy</h3>
+					<p>By using this Application, you agree to our collection, use, and storage of personal 
+					data for the sake of using the Application. We collect only the necessary data for the 
+					functionality of the Application and do not share your personal information with third 
+					parties without your consent, except as required by law.</p>
+					<h3>2. Application Sharing</h3>
+					<p>Users may not distribute, sell, or share the Application or its associated data without 
+					express written consent from Thunder Inc.. This includes, but is not limited to:
+						<ul>
+							<li>Unauthorized sharing of data, code, or intellectual property associated with the Application.</li>
+							<li>Selling, distributing, or sublicensing the Application to any third party without permission.</li>
+							<li>Sharing or distributing personal data collected by the Application without proper user consent 
+								and in violation of data protection laws.</li>
+						</ul>
+					</p>
+					<h3>3. Indemnification</h3>
+					<p>To the fullest extent permitted by law, you agree to indemnify, defend, and hold harmless 
+					Thunder Inc., its officers, directors, employees, agents, and affiliates from and against any 
+					claims, damages, losses, liabilities, costs, and expenses (including attorney’s fees) arising 
+					out of or related to:
+						<ul>
+							<li>Your use or misuse of the Application.</li>
+							<li>Any breach of this Agreement.</li>
+							<li>Data breaches, zero-day attacks, database worms, SQL injections, or any other 
+							security vulnerabilities impacting your data.</li>
+						</ul>
+					Thunder Inc. shall not be liable for any damages or losses incurred by the User due to these events, and the User assumes 
+					full responsibility for the security of their systems and data while using the Application.</p>
+					<h3>4. Security and Vulnerability Management</h3>
+					<p>We perform regular vulnerability assessments and audits on our systems to ensure the Application’s 
+					security. We require that our key vendors and third-party service providers also conduct regular 
+					security assessments and take preventive measures against known vulnerabilities, including but not 
+					limited to zero-day attacks and malware infections. However, despite our best efforts, no system is 
+					entirely secure, and you agree that Thunder Inc. shall not be held liable for unauthorized access to 
+					your data or any resulting losses or damages.</p>
+					<h3>5. Ongoing Compliance and Updates</h3>
+					<p>Technology and the cybersecurity landscape are continually evolving. As such, we reserve the right 
+					to modify this Agreement and our security practices from time to time to comply with new laws, 
+					regulations, and industry standards. By continuing to use the Application, you agree to any future 
+					changes to this Agreement, which will be made available at ThunderPlanner.com/UserAgreement. You are 
+					responsible for reviewing this Agreement periodically for updates.</p>
+					<h3>6. Compliance with Industry-Specific Standards</h3>
+					<p>Our Application complies with the following industry-specific standards: 
+					Cross-Site Request Forgery (CSRF) Protection, Cross-Site Scripting (XSS) Protection, 
+					SQL Injection Protection, Clickjacking Protection, Password Storage, and SSL/HTTPS, 
+					among others. We are committed to maintaining compliance with applicable regulations 
+					as they evolve, and any changes to our compliance standards will be reflected in updates 
+					to this Agreement.</p>
+					<p>By using this Application, you acknowledge that you have read, understood, and agree to be bound by this Agreement.</p>
+					<p>Thunder Inc.<br>10/28/24</p>
+					
+
+				</div>
+                <input type="checkbox" id="agreeCheck"> I agree to the terms and conditions.
+            </div>
+            <div class="modal-footer">
+                <button id="continueButton" onclick="closeModal()">Continue</button>
+                <button onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+	
+	<!-- User Agreement -->
+    <div id="installationInstructionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Installation Instructions</h2>
+            </div>
+            <div class="modal-body">
+				 <h2>How to install Thunder</h2>
+				<div class="terms-container">
+					<h2>Installation Instructions</h2>
+					<p>To install Thunder Business Planner, simply download the application from this website by 
+					agreeing to Thunder Inc.’s terms and conditions. Once your application has finished downloading, 
+					run thunder.exe, and that’s it! Yes, it is really that simple to begin planning your next business 
+					venture with Thunder today!</p>
+					<p>Thunder Inc.<br>10/28/24</p>
+				</div>
+      
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeInstInstructions()">Close</button>
+            </div>
+        </div>
+    </div>
+	
+	<!-- User Agreement -->
+    <div id="aboutUsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>About Us</h2>
+            </div>
+            <div class="modal-body">
+				 <h2>About Thunder Inc.</h2>
+				<div class="terms-container">
+					<h2>About Us</h2>
+					<p>Founded in 2024, Thunder is a small team of college students passionate about helping budding entrepreneurs, small business owners, 
+					and business professionals plan their next venture! We know that there are many people who are interested in starting a business, 
+					but may not have the knowledge or tools to put together an effective business plan on their own. We also realize that there are many 
+					business professionals who may not be entirely comfortable building a plan with a computer. Thunder aims to streamline the business 
+					plan creation process for users of all skill and knowledge levels. With our automatic PDF generator and advanced AI business assistant, 
+					we are confident that Thunder can help you bring your dreams to life!</p>
+					<p>Thunder Inc.<br>10/28/24</p>
+				</div>
+      
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeAboutUs()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal functions
+        function openModal() {
+            document.getElementById("userAgreementModal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("userAgreementModal").style.display = "none";
+        }
+		
+		function openInstInstructions() {
+            document.getElementById("installationInstructionsModal").style.display = "block";
+        }
+
+        function closeInstInstructions() {
+            document.getElementById("installationInstructionsModal").style.display = "none";
+        }
+		
+		function openAboutUs() {
+            document.getElementById("aboutUsModal").style.display = "block";
+        }
+
+        function closeAboutUs() {
+            document.getElementById("aboutUsModal").style.display = "none";
+        }
+
+        // Enable the continue button if the checkbox is checked
+        document.getElementById("agreeCheck").addEventListener('change', function() {
+            document.getElementById("continueButton").disabled = !this.checked;
+        });
+
+        // Redirect to download after agreeing
+        document.getElementById("continueButton").addEventListener('click', function() {
+			window.location.href = "https://www.dropbox.com/scl/fi/ugqaexn74k3032pbv6wh6/main.exe?rlkey=timb5pgcmglg5hzkk8s03tvtz&st=40sqxdlm&dl=1"; 
+		});
+
+    </script>
+</body>
+</html>

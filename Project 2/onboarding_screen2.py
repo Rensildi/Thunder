@@ -1,12 +1,13 @@
 import customtkinter as ctk
 from pathlib import Path
 from PIL import Image
+from database import resource_path
 
-ASSETS_PATH = Path(r"C:\Users\rkala\OneDrive\Desktop\Thunder\Project 2\images\frame1")
+ASSETS_PATH = Path(resource_path("images\frame1"))
 
 
-def relative_to_assets(path: str) -> Path:
-    return ASSETS_PATH / Path(path)
+#def relative_to_assets(path: str) -> Path:
+    #return ASSETS_PATH / Path(path)
 
 
 def run(parent_window, on_next):
@@ -24,14 +25,14 @@ def run(parent_window, on_next):
     )
     label_description.place(x=42, y=186)
 
-    image1_path = relative_to_assets("image_1.png")
-    pil_image1 = Image.open(image1_path)
+    #image1_path = relative_to_assets("image_1.png")
+    pil_image1 = Image.open(resource_path("images/image_2_1.png"))
     image1 = ctk.CTkImage(light_image=pil_image1, size=(200, 200))
     label_image1 = ctk.CTkLabel(frame, image=image1, text="")
     label_image1.place(x=200, y=260)
 
-    image2_path = relative_to_assets("image_2.png")
-    pil_image2 = Image.open(image2_path)
+    #image2_path = relative_to_assets("image_2.png")
+    pil_image2 = Image.open(resource_path("images/image_2_2.png"))
     image2 = ctk.CTkImage(light_image=pil_image2, size=(200, 200))
     label_image2 = ctk.CTkLabel(frame, image=image2, text="")
     label_image2.place(x=540, y=260)
