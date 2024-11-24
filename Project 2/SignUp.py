@@ -15,6 +15,7 @@ import os
 
 class SignUp(CTkFrame):
     def __init__(self, main_app):
+        """Initialize sign up class"""
         super().__init__(main_app.root)  # Pass the main app's root
         self.main_app = main_app
         self.create_widgets()
@@ -31,7 +32,6 @@ class SignUp(CTkFrame):
 
     def widget_image_section(self):
         """Add an image to the left side of the window"""
-
         image_path = resource_path("images/signup.jpg")
         pil_image = Image.open(image_path).convert("RGBA")  # Ensure image has alpha channel for transparency
 
@@ -54,6 +54,7 @@ class SignUp(CTkFrame):
 
     
     def widget_welcome_section(self):
+        """Welcome widget"""
         # Welcome Label
         self.welcome_label = CTkLabel(master=self, text="Welcome to Thunder", font=("Arial", 30))
         self.welcome_label.place(relx=0.7, rely=0.089, anchor="center")
@@ -63,6 +64,7 @@ class SignUp(CTkFrame):
         self.description_label.place(relx=0.7, rely=0.145, anchor="center")
     
     def widget_email_section(self):
+        """Create email section"""
         # Email label
         self.email_label = CTkLabel(master=self, text="Email")
         self.email_label.place(relx=0.536, rely=0.16)
@@ -84,6 +86,7 @@ class SignUp(CTkFrame):
         self.email_requirements.place(relx=0.536, rely=0.25)
 
     def widget_username_section(self):
+        """Create username section"""
         # Username label
         self.username_label = CTkLabel(master=self, text='Username')
         self.username_label.place(relx=0.536, rely=0.30)
@@ -105,6 +108,7 @@ class SignUp(CTkFrame):
         self.username_requirements.place(relx=0.536, rely=0.383)
 
     def widget_password_section(self):
+        """Create password section"""
         # Password label
         self.password_label = CTkLabel(master=self, text="Password")
         self.password_label.place(relx=0.536, rely=0.44)
@@ -148,12 +152,13 @@ class SignUp(CTkFrame):
         self.confirm_password_requirements.place(relx=0.536, rely=0.699, anchor="w")
 
     def widget_sign_up_button(self):
+        """Create sign up section"""
         # Sign Up button
         self.sign_up_button = CTkButton(master=self, text="Sign Up", width=300, height=30, command=self.sign_up)
         self.sign_up_button.place(relx=0.7, rely=0.755, anchor="center")
 
     def widget_alternative_sign_up_button(self):
-        # Alternative sign up Google button
+        """Alternative sign up Google button"""
         self.continue_google_button = CTkButton(master=self, text="Continue With Google", width=300, height=30, command=self.sign_up_with_google)
         self.continue_google_button.place(relx=0.7, rely=0.823, anchor="center")
     
@@ -226,16 +231,18 @@ class SignUp(CTkFrame):
         self.update_console(f"Signing in with Google account: {email}")
     
     def update_console(self, message):
+        """Update console output"""
         self.console_output.configure(text=message)
         
 
     def widget_return_to_sign_in_button(self):
+        """Return to sign in screen button"""
         self.return_button = CTkButton(master=self, text="Back to Sign In", width=300, height=30, command=self.return_to_sign_in)
         self.return_button.place(relx=0.7, rely=0.891, anchor="center")  # Adjust position as needed
     
 
     def reset_form(self):
-        # Clear all input fields and reset error messages
+        """Clear all input fields and reset error messages"""
         self.username_entry.delete(0, "end")
         self.password_entry.delete(0, "end")
         self.confirm_password_entry.delete(0, "end")
@@ -249,11 +256,12 @@ class SignUp(CTkFrame):
             self.account_created_message.place_forget()
     
     def return_to_sign_in(self):
-        # Return to the sign-in screen and reset the form
+        """Return to the sign-in screen and reset the form"""
         self.reset_form()
         self.main_app.show_signin()  # Call the main app's method to show the SignIn screen
 
     def sign_up(self):
+        """Main sign up function"""
         email = self.email_entry.get()
         username = self.username_entry.get()
         password = self.password_entry.get()
@@ -347,19 +355,19 @@ class SignUp(CTkFrame):
         self.after(2000, self.return_to_sign_in)
         
     def return_to_sign_in(self):
+        """Return to sign in function"""
         self.reset_form()
         self.main_app.show_signin()
 
     def on_show(self):
+        """Obscure password fields"""
         self.reset_form()
         self.password_entry.configure(show="*") # Ensure password is hidden
         self.confirm_password_entry.configure(show="*") # Ensure the confirm password is hidden
-    
-    
-
 
     def hide(self):
-        self.pack_forget()  # Use pack_forget to hide the current screen
+        """Hide the current section"""
+        self.pack_forget() 
         
 if __name__ == "__main__":
     pass

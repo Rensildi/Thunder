@@ -11,6 +11,7 @@ ASSETS_PATH = Path(resource_path("images\frame1"))
 
 
 def run(parent_window, on_next):
+    """Run the second tutorial screen"""
     frame = ctk.CTkFrame(parent_window, fg_color="#105090")
     frame.pack(fill="both", expand=True)
 

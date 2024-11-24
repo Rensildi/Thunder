@@ -10,6 +10,7 @@ FORM_ENDPOINT = os.getenv("FORM_ENDPOINT")
 
 class FeedbackForm(CTkToplevel):
     def __init__(self, dashboard, id, email, username):
+        """Initialize Feedback"""
         super().__init__()
         self.dashboard = dashboard  # Reference to the Dashboard instance
         self.id = id
@@ -22,6 +23,7 @@ class FeedbackForm(CTkToplevel):
         self.create_widgets()
 
     def create_widgets(self):
+        """Create feedback widgets"""
         CTkLabel(self, text="We value your feedback!", font=("Arial", 16)).pack(pady=10)
 
         # Feedback entry
@@ -33,6 +35,7 @@ class FeedbackForm(CTkToplevel):
         submit_button.pack(pady=10)
 
     def submit_feedback(self):
+        """Submit feedback"""
         feedback_content = self.feedback_text.get("1.0", "end").strip()
 
         if not feedback_content:

@@ -170,6 +170,7 @@ class BusinessPlanForm(CTkToplevel):
 
 
     def help_explanation(self, message, event=None):
+      """Add explanation to help box"""
       CTkMessagebox(title="Explanation", message=message, icon="info")
 
     def create_label_and_help(self, text, row, column, help_text, help_explanation_func):
@@ -1311,6 +1312,7 @@ class BusinessPlanForm(CTkToplevel):
         self.destroy()
 
     def send_message(self, event=None):
+        """Send message to AI bot"""
         user_message = self.user_input.get()
 
         if user_message.lower() == "exit":

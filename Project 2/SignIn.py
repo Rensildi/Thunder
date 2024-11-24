@@ -15,6 +15,7 @@ import os
 
 class SignIn(CTkFrame):
     def __init__(self, main_app):
+        """Initialize sign in"""
         super().__init__(main_app.root)  # Pass the main app's root
         self.main_app = main_app
         self.create_widgets()
@@ -22,6 +23,7 @@ class SignIn(CTkFrame):
         self.is_loading = False 
 
     def create_widgets(self):
+        """Initialize widgets"""
         self.widget_welcome_section()
         self.widget_email_section()
         # self.widget_username_section() replaced widget_username_section() with widget_email_section()
@@ -64,6 +66,7 @@ class SignIn(CTkFrame):
         self.image_label.place(relx=0.26, rely=0.51, anchor="center")  
 
     def widget_welcome_section(self):
+        """Create welcome section"""
         # Welcome Label
         welcome_label = CTkLabel(master=self, text="Welcome Back", font=("Arial", 30))
         welcome_label.place(relx=0.7, rely=0.1, anchor="center")
@@ -73,6 +76,7 @@ class SignIn(CTkFrame):
         description_label.place(relx=0.7, rely=0.15, anchor="center")
 
     def widget_email_section(self):
+        """Create email section"""
         # Email label
         self.email_label = CTkLabel(master=self, text="Email")
         self.email_label.place(relx=0.536, rely=0.22)
@@ -82,6 +86,7 @@ class SignIn(CTkFrame):
         self.email_entry.place(relx=0.7, rely=0.28, anchor="center")
         
     def widget_password_section(self):
+        """Create password section"""
         # Password label
         self.password_label = CTkLabel(master=self, text="Password")
         self.password_label.place(relx=0.536, rely=0.38)
@@ -92,18 +97,21 @@ class SignIn(CTkFrame):
         
         
     def widget_sign_in_button(self):
+        """Create sign in button"""
         # Sign In button
         sign_in = CTkButton(master=self, text="Sign In", command=self.sign_in)
         sign_in.configure(width=300, height=30)
         sign_in.place(relx=0.7, rely=0.6, anchor="center")
 
     def widget_sign_up_button(self):
+        """Create sign up button"""
         # Sign Up button
         sign_up = CTkButton(master=self, text="Sign Up", command=self.launch_signup)
         sign_up.configure(width=300, height=30)
         sign_up.place(relx=0.7, rely=0.7, anchor="center")
 
     def widget_alternative_sign_in_button(self):
+        """Create sign in with google button"""
         # Continue with Google button
         continue_google = CTkButton(master=self, text="Continue With Google", command=self.sign_in_with_google)
         continue_google.configure(width=300, height=30)
@@ -172,20 +180,22 @@ class SignIn(CTkFrame):
             conn.close()
 
     def widget_console_output(self):
-        # Create a console output area
+        """Create a console output area"""
         self.console_output = CTkLabel(master=self, text="", font=("Arial", 12), text_color="red", justify="left", wraplength=400)
         self.console_output.place(relx=0.7, rely=0.9, anchor="center")
     
     def update_console(self, message):
-        # Method to update console output
+        """Method to update console output"""
         self.console_output.configure(text=message)
     
     def launch_signup(self):
+        """Show the sign up screen"""
         self.reset_form()
         self.main_app.show_signup()  # Call the main app's method to show the SignUp screen
 
     def sign_in(self):
-        # Implement sign-in functionality here
+        """Main sign in function"""
+        # Implement sign-in functionality
         email = self.email_entry.get().strip()
         password = self.password_entry.get().strip()
         
@@ -237,6 +247,7 @@ class SignIn(CTkFrame):
         print("Sign In button clicked")  
     
     def show_onboarding(self, username, email):
+        """Show the tutorial"""
         self.reset_form()
         self.hide()
         
@@ -267,6 +278,7 @@ class SignIn(CTkFrame):
         self.sign_in()
     
     def update_circle(self):
+        """Implement the loading circle spinner"""
         # Check if loading should continue
         if self.is_loading:
             
@@ -296,6 +308,7 @@ class SignIn(CTkFrame):
             self.after(50, self.update_circle)
     
     def show_dashboard(self,username):
+        """Transition to the dashboard"""
         self.reset_form()
         # Hide current frame and open the dashboard
         self.hide()
@@ -303,10 +316,11 @@ class SignIn(CTkFrame):
         dashboard.pack(fill='both', expand=True)
     
     def hide(self):
+        """Hide current screen"""
         self.pack_forget()  # Use pack_forget to hide the current screen
         
     def reset_form(self):
-        # Clear all input fields and reset error messages
+        """Clear all input fields and reset error messages"""
         self.email_entry.delete(0, "end")    # Clear the username
         self.password_entry.delete(0, "end")    # Clear the password
         self.update_console("")                 # Clear console
@@ -314,6 +328,7 @@ class SignIn(CTkFrame):
         self.canvas.delete("all")               # Clear the loading circle
         
     def on_show(self):
+        """Obscure password"""
         self.reset_form()
         self.password_entry.configure(show="*") # Ensure password is hidden
         self.is_loading = False

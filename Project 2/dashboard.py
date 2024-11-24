@@ -13,10 +13,12 @@ question_mark_image = question_mark_image.resize((20, 20), Image.Resampling.LANC
 question_mark_ctk_image = CTkImage(light_image=question_mark_image, dark_image=question_mark_image, size=(20, 20))
 
 def help_explanation(message, event=None):
+    """Help button explanation"""
     CTkMessagebox(title="Explanation", message=message, icon="info")
 
 class Dashboard(CTkFrame):
     def __init__(self, main_app, username):
+        """Initialize dashboard"""
         super().__init__(master=main_app.root)  
         self.main_app = main_app  
         self.username = username  
@@ -35,6 +37,7 @@ class Dashboard(CTkFrame):
         self.load_business_plans()  
 
     def create_widgets(self):
+        """Create widgets"""
         # Dashboard Label
         self.label = CTkLabel(
             self,
@@ -189,12 +192,13 @@ class Dashboard(CTkFrame):
         self.dropdown_menu.set(self.username)
     
     def open_business_plan_form(self):
-        # Open the business plan form in a new window
+        """Open the business plan form in a new window"""
         plan_window = BusinessPlanForm(self, self.username)
         plan_window.protocol("WM_DELETE_WINDOW", lambda: self.close_business_plan_window(plan_window))  
         self.open_windows.append(plan_window)  
         
     def logout(self):
+        """Logout of application"""
         if self.open_windows:  
             messagebox.showwarning("Warning", "Please close all open Business Plan windows before logging out.")
         else:
@@ -348,6 +352,7 @@ class Dashboard(CTkFrame):
         conn.close()
 
     def connect_db(self):
+        """Connect to DB"""
         return sqlite3.connect('thunder.db') 
 
     def edit_selected_plan(self, business_name):

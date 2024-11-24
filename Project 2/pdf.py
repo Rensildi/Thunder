@@ -9,6 +9,7 @@ from database import get_revenue_projection, get_market_share_projection
 
 class BusinessPlanPDFGenerator:
     def __init__(self, business_plan_data):
+        """Initialize PDF"""
         self.business_plan_data = business_plan_data
         self.pdf_buffer = BytesIO()
     

@@ -11,6 +11,7 @@ from database import resource_path
 
 
 def run(parent_window, on_next):
+    """Run the first tutorial screen"""
     frame = ctk.CTkFrame(parent_window, fg_color="#105090")
     frame.pack(fill="both", expand=True)
 
