@@ -489,6 +489,66 @@
   ('asyncio.windows_utils',
    'C:\\Users\\rkala\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\asyncio\\windows_utils.py',
    'PYMODULE'),
+  ('awesometkinter',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\__init__.py',
+   'PYMODULE'),
+  ('awesometkinter.button',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\button.py',
+   'PYMODULE'),
+  ('awesometkinter.config',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\config.py',
+   'PYMODULE'),
+  ('awesometkinter.datepicker',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\datepicker.py',
+   'PYMODULE'),
+  ('awesometkinter.dialog',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\dialog.py',
+   'PYMODULE'),
+  ('awesometkinter.frame',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\frame.py',
+   'PYMODULE'),
+  ('awesometkinter.images',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\images.py',
+   'PYMODULE'),
+  ('awesometkinter.label',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\label.py',
+   'PYMODULE'),
+  ('awesometkinter.menu',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\menu.py',
+   'PYMODULE'),
+  ('awesometkinter.progressbar',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\progressbar.py',
+   'PYMODULE'),
+  ('awesometkinter.scrollbar',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\scrollbar.py',
+   'PYMODULE'),
+  ('awesometkinter.text',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\text.py',
+   'PYMODULE'),
+  ('awesometkinter.tooltip',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\tooltip.py',
+   'PYMODULE'),
+  ('awesometkinter.utils',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\utils.py',
+   'PYMODULE'),
+  ('awesometkinter.version',
+   'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
+   '2\\rensildi_chatbot\\Lib\\site-packages\\awesometkinter\\version.py',
+   'PYMODULE'),
   ('backports',
    'C:\\Users\\rkala\\OneDrive\\Desktop\\Thunder\\Project '
    '2\\rensildi_chatbot\\Lib\\site-packages\\setuptools\\_vendor\\backports\\__init__.py',

@@ -1,5 +1,6 @@
 from customtkinter import CTkToplevel, CTkLabel, CTkEntry, CTkButton, CTkTextbox, CTkFrame, CTkScrollableFrame, CTkImage
 from database import insert_business_plan, update_business_plan, check_business_name_exists, get_business_plan_data, get_revenue_projection, get_market_share_projection
+import awesometkinter
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -79,6 +80,7 @@ class BusinessPlanForm(CTkToplevel):
         
         CTkLabel(self.form_frame, text="Business Plan:", font=("Arial", 20)).pack(side="top", pady=(10, 0), anchor="center")
         CTkLabel(self.ai_frame, text="Business Assistant:", font=("Arial", 20)).pack(side="top", pady=(10, 0), anchor="center")
+        
 
         # Add a scrollable frame to form_frame for the business plan form
         self.scrollable_form_frame = CTkScrollableFrame(self.form_frame, width=480, height=450)
@@ -170,7 +172,6 @@ class BusinessPlanForm(CTkToplevel):
 
 
     def help_explanation(self, message, event=None):
-      """Add explanation to help box"""
       CTkMessagebox(title="Explanation", message=message, icon="info")
 
     def create_label_and_help(self, text, row, column, help_text, help_explanation_func):
@@ -1131,24 +1132,52 @@ class BusinessPlanForm(CTkToplevel):
 
     def initialize_ai_chat(self):
         """Initialize the AI Chat section in ai_frame"""
-        # Chat box
-        self.chat_box = CTkTextbox(self.ai_frame, width=380, height=450, state='disabled')
-        self.chat_box.pack(pady=10, fill="y")
-
-        # User input
-        self.user_input = CTkEntry(self.ai_frame, width=380)
-        self.user_input.pack(pady=10)
-        self.user_input.bind("<Return>", self.send_message)
-
+        
         # Create a frame to hold the buttons centered
         self.ai_button_frame = CTkFrame(self.ai_frame)
-        self.ai_button_frame.pack(side="top", pady=20)  # Adds padding at the top of the frame
+        self.ai_button_frame.pack(side="bottom", pady=20)  # Adds padding at the bottom of the frame
 
         # Send button
         self.send_button = CTkButton(self.ai_button_frame, text="Send", command=self.send_message)
         self.send_button.pack(padx=10, pady=10)
+        
+        # User input
+        self.user_input = CTkEntry(self.ai_frame, width=380)
+        self.user_input.pack(side="bottom", pady=10)
+        self.user_input.bind("<Return>", self.send_message)
+        
+        # Chat box
+        self.chat_box = CTkTextbox(self.ai_frame, width=380, height=200, state='disabled')
+        self.chat_box.pack(side="bottom", pady=10, fill="y")
+        
+        # Circular Progressbar
+        self.progress_frame = CTkFrame(self.ai_frame)
+        self.progress_frame.pack(side="top", pady=10)
 
+        self.progress_bar = awesometkinter.RadialProgressbar(
+            self.progress_frame, fg='red', parent_bg="#2a2d2e", size=(120, 120)
+        )
+        self.progress_bar.grid(row=0, column=0, pady=10)
+
+        self.progress_label = CTkLabel(self.progress_frame, text="Progress Tracker", font=("Arial", 14))
+        self.progress_label.grid(row=1, column=0, pady=5)
+        
+        # Initialize progress tracking
+        self.total_fields = len(self.collect_fields())
+        self.completed_fields = 0
+        self.update_progress_bar()
+
+    def update_progress_bar(self):
+            """Update the circular progress bar."""
+            completion_percentage = self.calculate_completion()
+            self.progress_bar.set(completion_percentage)  # Set the percentage
+            self.progress_label.configure(text=f"Progress: {int(completion_percentage)}%")
+    
     def submit_business_plan(self):
+        """Submit the business plan. Either initially or as an update."""
+        
+
+        self.update_progress_bar()
         """Submit the business plan. Either initially or as an update."""
         # Collect data from form fields
         new_business_name = self.name_entry.get("1.0", "end").strip()
@@ -1227,7 +1256,7 @@ class BusinessPlanForm(CTkToplevel):
             return
 
         market_analysis = [{"competitor": competitor, "market_share": int(market_share)} for competitor, market_share in zip(main_competitors, market_shares)]
-
+        
 
         # Combine all data for submission
         data = {
@@ -1310,9 +1339,31 @@ class BusinessPlanForm(CTkToplevel):
 
         self.master.load_business_plans()
         self.destroy()
+    
+    def collect_fields(self):
+        """Collect all form fields to calculate progress."""
+        return [
+            self.name_entry, self.industry_entry, self.employees_entry, self.legal_structure_entry,
+            self.description_entry, self.mission_statement_entry, self.principal_members_entry, self.future_entry,
+            self.products_entry, self.services_entry, self.pricing_entry, self.r_and_d_entry,
+            self.industry_state_entry, self.competitors_entry, self.target_audience_entry, self.advantages_entry,
+            self.compliance_entry, self.growth_strategy_entry, self.marketing_budget_entry, self.adverising_entry,
+            self.interaction_entry, self.retention_entry, self.bank_entry, self.accounting_firm_entry,
+            self.financing_entry, self.profit_loss_entry, self.break_even_entry, self.roi_entry,
+            self.contingency_entry, self.disaster_recovery_entry, self.insurance_entry, self.contact_name_entry,
+            self.address_entry, self.city_entry, self.state_entry, self.zip_entry, self.phone_entry,
+            self.email_entry, self.law_firm_entry, self.intellectual_property_entry
+        ]
+
+    def calculate_completion(self):
+        """Calculate the completion percentage based on filled fields."""
+        filled_fields = sum(
+            bool(field.get("1.0", "end").strip()) for field in self.collect_fields()
+        )
+        return (filled_fields / self.total_fields) * 100
+
 
     def send_message(self, event=None):
-        """Send message to AI bot"""
         user_message = self.user_input.get()
 
         if user_message.lower() == "exit":
@@ -1365,3 +1416,10 @@ class BusinessPlanForm(CTkToplevel):
 
         # Open PDF using system's default viewer
         os.startfile(temp_file_path)
+
+def bind_field_updates(self):
+    """Bind <KeyRelease> to update progress as user fills the form fields."""
+    for field in self.collect_fields():
+        field.bind("<KeyRelease>", lambda e: self.update_progress_bar())
+
+        
