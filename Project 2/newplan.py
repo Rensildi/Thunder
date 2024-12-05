@@ -11,6 +11,7 @@ from reportlab.pdfgen import canvas
 from PIL import Image, ImageTk
 from CTkMessagebox import CTkMessagebox
 from database import resource_path
+import customtkinter as ctk
 load_dotenv()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -1153,14 +1154,22 @@ class BusinessPlanForm(CTkToplevel):
         # Circular Progressbar
         self.progress_frame = CTkFrame(self.ai_frame)
         self.progress_frame.pack(side="top", pady=10)
-
+        
+        # Background Frame for the Progress Bar
+        self.background_frame = ctk.CTkFrame(self.progress_frame, fg_color="transparent", width=380, height=240)
+        self.background_frame.grid(row=0, column=0, pady=10)
+        
         self.progress_bar = awesometkinter.RadialProgressbar(
-            self.progress_frame, fg='red', parent_bg="#2a2d2e", size=(120, 120)
+            self.progress_frame, fg='red', parent_bg="#2a2d2e", size=(200, 200)
         )
-        self.progress_bar.grid(row=0, column=0, pady=10)
+        self.progress_bar.place(relx=0.5, rely=0.5, anchor="center")
 
         self.progress_label = CTkLabel(self.progress_frame, text="Progress Tracker", font=("Arial", 14))
         self.progress_label.grid(row=1, column=0, pady=5)
+        
+        self.total_fields = 10
+        self.completed_fields = 0
+        self.update_progress_bar()
         
         # Initialize progress tracking
         self.total_fields = len(self.collect_fields())
@@ -1338,6 +1347,12 @@ class BusinessPlanForm(CTkToplevel):
             print("Business Plan Submitted and Saved to Database")
 
         self.master.load_business_plans()
+        self.close_window()
+    
+    def close_window(self):
+        ''' Close the current business plan window'''
+        if self in self.master.open_windows:
+            self.master.open_windows.remove(self)
         self.destroy()
     
     def collect_fields(self):
