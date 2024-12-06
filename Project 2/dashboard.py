@@ -305,15 +305,19 @@ class Dashboard(CTkFrame):
 
         # Search term
         offset = (self.current_page - 1) * self.page_size
-        cursor.execute("SELECT business_name FROM business_plans WHERE username=? AND business_name LIKE ? LIMIT ? OFFSET ?", 
+        cursor.execute("SELECT business_name, date_created FROM business_plans WHERE username=? AND business_name LIKE ? LIMIT ? OFFSET ?", 
                        (self.username, f"%{search_term}%", self.page_size, offset))
         plans = cursor.fetchall()
 
         # Create buttons for each matching business plan
         for plan in plans:
-            business_name = plan[0]
-            button = CTkButton(self.plans_frame, text=business_name, border_width=0, command=lambda name=business_name: self.edit_selected_plan(name))
-            button.pack(pady=5, fill='x')  
+                business_name = plan[0]
+                date = plan[1]
+                date_obj = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%f")
+                formatted_date = date_obj.strftime("%m-%d-%Y")
+                button_text = f"{business_name} - {formatted_date}"
+                button = CTkButton(self.plans_frame, text=button_text, border_width=0, command=lambda name=business_name: self.edit_selected_plan(name))
+                button.pack(pady=5, padx=15, fill='x') 
         
         cursor.close()
         conn.close()

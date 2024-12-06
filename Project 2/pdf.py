@@ -75,12 +75,12 @@ class BusinessPlanPDFGenerator:
         elements.extend(self.create_section("Industry State", 2, normal_style))
         elements.extend(self.create_section("Competitors", 3, normal_style))
         elements.append(Spacer(1, 12))
-        # Sample graph just to test inserting in pdf
+        # Market share graph
         market_image_stream = self.create_market_share_chart()
-
-        # Add graph to the pdf
-        market_image = Image(market_image_stream, width=300, height=200)
-        elements.append(market_image)
+        if market_image_stream != "None":
+            # Add graph to the pdf
+            market_image = Image(market_image_stream, width=300, height=200)
+            elements.append(market_image)
         elements.extend(self.create_section("Target Audience", 4, normal_style))
         elements.extend(self.create_section("Company Advantages", 5, normal_style))
         elements.extend(self.create_section("Regulations Compliance", 6, normal_style))
@@ -123,12 +123,10 @@ class BusinessPlanPDFGenerator:
 
         # Sample graph just to test inserting in pdf
         revenue_image_stream = self.create_revenue_chart()
-
-        # Add graph to the pdf
-        revenue_image = Image(revenue_image_stream, width=300, height=200)
-        elements.append(revenue_image)
-
-        
+        if revenue_image_stream != "None":
+            # Add graph to the pdf
+            revenue_image = Image(revenue_image_stream, width=300, height=200)
+            elements.append(revenue_image)
         
         # Create the pdf
         doc.build(elements)
@@ -244,30 +242,33 @@ class BusinessPlanPDFGenerator:
         revenue = [row[1] for row in revenue_data]
         expenditure = [row[2] for row in revenue_data]
 
-        # Create plot
-        plt.figure(figsize=(10, 6))
-        plt.plot(years, revenue, marker='o', label="Revenue", color="green")
-        plt.plot(years, expenditure, marker='o', label="Expenditure", color="red")
+        if not years:
+            return "None"
+        else:
+            # Create plot
+            plt.figure(figsize=(10, 6))
+            plt.plot(years, revenue, marker='o', label="Revenue", color="green")
+            plt.plot(years, expenditure, marker='o', label="Expenditure", color="red")
 
-        # Scale axes
-        plt.xticks(range(min(years), max(years) + 1))  
-        max_value = max(max(revenue), max(expenditure))
-        plt.ylim(0, max_value * 1.1)  # Add margin
+            # Scale axes
+            plt.xticks(range(min(years), max(years) + 1))  
+            max_value = max(max(revenue), max(expenditure))
+            plt.ylim(0, max_value * 1.1)  # Add margin
 
-        # Add labels
-        plt.title("Revenue and Expenditure Over Time")
-        plt.xlabel("Year")
-        plt.ylabel("Amount")
-        plt.legend()
-        plt.grid(True)
+            # Add labels
+            plt.title("Revenue and Expenditure Over Time")
+            plt.xlabel("Year")
+            plt.ylabel("Amount")
+            plt.legend()
+            plt.grid(True)
 
-        # Save to BytesIO
-        img_stream = BytesIO()
-        plt.savefig(img_stream, format='png')
-        plt.close()
-        img_stream.seek(0)
+            # Save to BytesIO
+            img_stream = BytesIO()
+            plt.savefig(img_stream, format='png')
+            plt.close()
+            img_stream.seek(0)
 
-        return img_stream
+            return img_stream
 
 
     def create_market_share_chart(self):
@@ -280,17 +281,20 @@ class BusinessPlanPDFGenerator:
         competitors = [row[0] for row in market_data]
         market_shares = [row[1] for row in market_data]
 
-        # Create the plot
-        plt.figure(figsize=(8, 6))
-        plt.pie(market_shares, labels=competitors, autopct='%1.1f%%', startangle=90)
-        plt.title("Market Share Distribution")
-        plt.axis('equal')
+        if not competitors:
+            return "None"
+        else:
+            # Create the plot
+            plt.figure(figsize=(8, 6))
+            plt.pie(market_shares, labels=competitors, autopct='%1.1f%%', startangle=90)
+            plt.title("Market Share Distribution")
+            plt.axis('equal')
 
-        # Save to BytesIO
-        img_stream = BytesIO()
-        plt.savefig(img_stream, format='png')
-        plt.close()
-        img_stream.seek(0)
-        
-        return img_stream
+            # Save to BytesIO
+            img_stream = BytesIO()
+            plt.savefig(img_stream, format='png')
+            plt.close()
+            img_stream.seek(0)
+            
+            return img_stream
 

@@ -309,75 +309,80 @@ def update_business_plan(original_business_name, data):
         cursor.execute('''
             UPDATE business_plans
             SET business_name = ?, date_created = ?, industry = ?, num_employees = ?, legal_structure = ?
-            WHERE business_name = ?
+            WHERE business_name = ? AND username = ?
         ''', (
             data["business_name"],
             datetime.now().isoformat(),
             data["industry"],
             data["employees"],
             data["legal_structure"],
-            original_business_name
+            original_business_name,
+            data["username"]
         ))
 
         # Update the executive summary
         cursor.execute('''
             UPDATE executive_summary
             SET description = ?, mission_statement = ?, principal_members = ?, future = ?
-            WHERE business_name = ?
+            WHERE business_name = ? AND username = ?
         ''', (
             data["description"],
             data["mission_statement"],
             data["principal_members"],
             data["future"],
-            original_business_name
+            original_business_name,
+            data["username"]
         ))
 
         # Update the market research
         cursor.execute('''
             UPDATE market_research
             SET industry = ?, competitors = ?, target_audience = ?, company_advantages = ?, regulations = ?
-            WHERE business_name = ?
+            WHERE business_name = ? AND username = ?
         ''', (
             data["industry_state"],
             data["competitors"],
             data["target_audience"],
             data["company_advantages"],
             data["regulations_compliance"],
-            original_business_name
+            original_business_name,
+            data["username"]
         ))
 
         # Update the marketing strategy
         cursor.execute('''
             UPDATE marketing_strategy
             SET growth_strategy = ?, advertising = ?, marketing_budget = ?, customer_interaction = ?, customer_retention = ?
-            WHERE business_name = ?
+            WHERE business_name = ? AND username = ?
         ''', (
             data["growth_strategy"],
             data["advertising_plan"],
             data["marketing_budget"],
             data["customer_interaction"],
             data["customer_retention"],
-            original_business_name
+            original_business_name,
+            data["username"]
         ))
 
         # Update the service line
         cursor.execute('''
             UPDATE service_line
             SET products = ?, services = ?, pricing_structure = ?, research_development = ?
-            WHERE business_name = ?
+            WHERE business_name = ? AND username = ?
         ''', (
             data["products"],
             data["services"],
             data["pricing"],
             data["research"],
-            original_business_name
+            original_business_name,
+            data["username"]
         ))
 
         # Update the contact information
         cursor.execute('''
             UPDATE contact_information
             SET contact_name = ?, address = ?, city = ?, state = ?, zip = ?, phone = ?, email = ?
-            WHERE business_name = ?
+            WHERE business_name = ? AND username = ?
         ''', (
             data["contact_name"],
             data["address"],
@@ -386,14 +391,15 @@ def update_business_plan(original_business_name, data):
             data["zip_code"],
             data["phone"],
             data["email"],
-            original_business_name
+            original_business_name,
+            data["username"]
         ))
 
         # Update the financial section
         cursor.execute('''
             UPDATE financial
             SET financing_sought = ?, profit_loss_statement = ?, break_even_analysis = ?, return_on_investment = ?, contingency_plan = ?, disaster_recovery = ?, bank = ?, accounting_firm = ?, insurance_info = ?
-            WHERE business_name = ?
+            WHERE business_name = ? AND username = ?
         ''', (
             data["financing_sought"],
             data["profit_loss_statement"],
@@ -404,18 +410,20 @@ def update_business_plan(original_business_name, data):
             data["bank"],
             data["accounting_firm"],
             data["insurance_info"],
-            original_business_name
+            original_business_name,
+            data["username"]
         ))
 
         # Update the legal section
         cursor.execute('''
             UPDATE legal
             SET intellectual_property = ?, law_firm = ?
-            WHERE business_name = ?
+            WHERE business_name = ? AND username = ?
         ''', (
             data["intellectual_property"],
             data["law_firm"],
-            original_business_name
+            original_business_name,
+            data["username"]
         ))
 
         # Delete old revenue projections

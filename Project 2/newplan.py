@@ -11,7 +11,6 @@ from reportlab.pdfgen import canvas
 from PIL import Image, ImageTk
 from CTkMessagebox import CTkMessagebox
 from database import resource_path
-import customtkinter as ctk
 load_dotenv()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -76,8 +75,16 @@ class BusinessPlanForm(CTkToplevel):
         self.form_frame = CTkFrame(self.container_frame, width=500)
         self.form_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
         
-        self.ai_frame = CTkFrame(self.container_frame, width=500)
-        self.ai_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
+        # Frame for Progress Tracker and AI Chat (right side)
+        self.ai_container_frame = CTkFrame(self.container_frame, width=500)
+        self.ai_container_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
+
+        # Progress Tracker Frame (above ai_frame)
+        self.progress_tracker_frame = CTkFrame(self.ai_container_frame, height=80, width=500)
+        self.progress_tracker_frame.pack(side="top", fill="x", padx=10, pady=(5, 0))
+
+        self.ai_frame = CTkFrame(self.ai_container_frame, width=500)
+        self.ai_frame.pack(side="top", fill="both", expand=True, padx=10, pady=(5, 10))
         
         CTkLabel(self.form_frame, text="Business Plan:", font=("Arial", 20)).pack(side="top", pady=(10, 0), anchor="center")
         CTkLabel(self.ai_frame, text="Business Assistant:", font=("Arial", 20)).pack(side="top", pady=(10, 0), anchor="center")
@@ -157,6 +164,7 @@ class BusinessPlanForm(CTkToplevel):
             self.initialize_create_form()
 
         # Initialize AI Chat section
+        self.initialize_progress_tracker()
         self.initialize_ai_chat()
 
         # Create a frame to hold the buttons centered
@@ -1131,50 +1139,41 @@ class BusinessPlanForm(CTkToplevel):
             market_share_entry.insert(0, market_share)
         self.market_share_entries.append(market_share_entry)
 
-    def initialize_ai_chat(self):
-        """Initialize the AI Chat section in ai_frame"""
-        
-        # Create a frame to hold the buttons centered
-        self.ai_button_frame = CTkFrame(self.ai_frame)
-        self.ai_button_frame.pack(side="bottom", pady=20)  # Adds padding at the bottom of the frame
-
-        # Send button
-        self.send_button = CTkButton(self.ai_button_frame, text="Send", command=self.send_message)
-        self.send_button.pack(padx=10, pady=10)
-        
-        # User input
-        self.user_input = CTkEntry(self.ai_frame, width=380)
-        self.user_input.pack(side="bottom", pady=10)
-        self.user_input.bind("<Return>", self.send_message)
-        
-        # Chat box
-        self.chat_box = CTkTextbox(self.ai_frame, width=380, height=200, state='disabled')
-        self.chat_box.pack(side="bottom", pady=10, fill="y")
-        
+    def initialize_progress_tracker(self):
         # Circular Progressbar
-        self.progress_frame = CTkFrame(self.ai_frame)
-        self.progress_frame.pack(side="top", pady=10)
-        
-        # Background Frame for the Progress Bar
-        self.background_frame = ctk.CTkFrame(self.progress_frame, fg_color="transparent", width=380, height=240)
-        self.background_frame.grid(row=0, column=0, pady=10)
-        
         self.progress_bar = awesometkinter.RadialProgressbar(
-            self.progress_frame, fg='red', parent_bg="#2a2d2e", size=(200, 200)
+            self.progress_tracker_frame, fg='red', parent_bg="#2a2d2e", size=(80, 80)  
         )
-        self.progress_bar.place(relx=0.5, rely=0.5, anchor="center")
+        self.progress_bar.pack(side="left", padx=(165,0), pady=10)
 
-        self.progress_label = CTkLabel(self.progress_frame, text="Progress Tracker", font=("Arial", 14))
-        self.progress_label.grid(row=1, column=0, pady=5)
-        
-        self.total_fields = 10
-        self.completed_fields = 0
-        self.update_progress_bar()
+        self.progress_label = CTkLabel(self.progress_tracker_frame, text="Progress", font=("Arial", 12))
+        self.progress_label.pack(side="right", padx=(0,120),pady=5)
         
         # Initialize progress tracking
         self.total_fields = len(self.collect_fields())
         self.completed_fields = 0
         self.update_progress_bar()
+    
+    
+    def initialize_ai_chat(self):
+        """Initialize the AI Chat section in ai_frame"""
+        
+        # Chat box
+        self.chat_box = CTkTextbox(self.ai_frame, width=380, height=400, state='disabled')
+        self.chat_box.pack(pady=10, fill="y")
+
+        # User input
+        self.user_input = CTkEntry(self.ai_frame, width=380)
+        self.user_input.pack(pady=10)
+        self.user_input.bind("<Return>", self.send_message)
+
+        # Create a frame to hold the buttons centered
+        self.ai_button_frame = CTkFrame(self.ai_frame)
+        self.ai_button_frame.pack(side="top", pady=20)  # Adds padding at the bottom of the frame
+
+        # Send button
+        self.send_button = CTkButton(self.ai_button_frame, text="Send", command=self.send_message)
+        self.send_button.pack(padx=10, pady=10)
 
     def update_progress_bar(self):
             """Update the circular progress bar."""
