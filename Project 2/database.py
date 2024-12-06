@@ -23,7 +23,16 @@ def initialize_db():
         )
     ''')
 
-    # Create the table with an additional column for the username
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS logins (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            login_timestamp TEXT NOT NULL,
+            logout_timestamp TEXT NOT NULL,
+            pushed TEXT DEFAULT 'N'
+        )
+    ''')
+    
     cursor.execute('''CREATE TABLE IF NOT EXISTS business_plans (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         username TEXT NOT NULL,
@@ -31,7 +40,8 @@ def initialize_db():
                         industry TEXT,
                         num_employees TEXT,
                         legal_structure TEXT,
-                        date_created TEXT NOT NULL
+                        date_created TEXT NOT NULL,
+                        percentage REAL
                     )''')
     
     cursor.execute('''CREATE TABLE IF NOT EXISTS executive_summary (
@@ -168,15 +178,16 @@ def insert_business_plan(username, data):
         # Insert into business_plans table
         print("Business plans")
         cursor.execute('''
-            INSERT INTO business_plans (username, business_name, industry, num_employees, legal_structure, date_created)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO business_plans (username, business_name, industry, num_employees, legal_structure, date_created, percentage)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', (
             username,
             data["business_name"],
             data["industry"],
             data["employees"],
             data["legal_structure"],
-            datetime.now().isoformat()
+            datetime.now().isoformat(),
+            data["percentage"]
         ))
 
         print("Executive Summary")
@@ -308,7 +319,7 @@ def update_business_plan(original_business_name, data):
         # Update the business plan
         cursor.execute('''
             UPDATE business_plans
-            SET business_name = ?, date_created = ?, industry = ?, num_employees = ?, legal_structure = ?
+            SET business_name = ?, date_created = ?, industry = ?, num_employees = ?, legal_structure = ?, percentage = ?
             WHERE business_name = ? AND username = ?
         ''', (
             data["business_name"],
@@ -316,6 +327,7 @@ def update_business_plan(original_business_name, data):
             data["industry"],
             data["employees"],
             data["legal_structure"],
+            data["percentage"],
             original_business_name,
             data["username"]
         ))

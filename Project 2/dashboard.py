@@ -2,7 +2,9 @@ from customtkinter import *
 from newplan import BusinessPlanForm
 from datetime import datetime
 import sqlite3
+import requests
 from tkinter import messagebox
+from supabase import *
 from CTkMessagebox import CTkMessagebox
 from PIL import Image, ImageTk
 from database import resource_path
@@ -21,9 +23,14 @@ class Dashboard(CTkFrame):
         """Initialize dashboard"""
         super().__init__(master=main_app.root)  
         self.main_app = main_app  
-        self.username = username  
+        self.username = username 
+        
         self.open_windows = []  # List to keep track of open business plan windows
         
+        # Get supabase connection from main
+        self.supabase = main_app.supabase
+        self.login_timestamp = datetime.now().isoformat()
+
         self.page_size = 8  # Number of plans per page
         self.current_page = 1  # Track the current page number
         
@@ -34,7 +41,7 @@ class Dashboard(CTkFrame):
         
         
         self.create_widgets()  
-        self.load_business_plans()  
+        self.load_business_plans() 
 
     def create_widgets(self):
         """Create widgets"""
@@ -197,11 +204,115 @@ class Dashboard(CTkFrame):
         plan_window.protocol("WM_DELETE_WINDOW", lambda: self.close_business_plan_window(plan_window))  
         self.open_windows.append(plan_window)  
         
+    def is_online(self):
+        """Check internet connection"""
+        try:
+            requests.get("https://www.google.com", timeout=3)
+            return True
+        except requests.ConnectionError:
+            return False
+        
+    def push_to_supabase(self):
+        """Push all new and unsynced login/business plan records to Supabase."""
+        conn = sqlite3.connect("thunder.db")
+        cursor = conn.cursor()
+
+        # Fetch all rows with pushed = 'N' for the user
+        cursor.execute("""
+            SELECT id, username, login_timestamp, logout_timestamp FROM logins
+            WHERE username = ? AND pushed = 'N'
+        """, (self.username,))
+        rows = cursor.fetchall()
+
+        if not rows:
+            print("No records to push.")
+        else:    
+            # Insert into supabase
+            login_data_to_insert = [
+                {"username": row[1], "login": row[2], "logout": row[3]}
+                for row in rows
+            ]
+            try:
+                # Insert into supabase
+                response = self.supabase.table("logins").insert(login_data_to_insert).execute()
+
+                # Check if the request was successful and if so, update pushed markers
+                if response.data:
+                    print("Successfully pushed to Supabase.")
+                    
+                    # Update local database to mark rows as pushed
+                    row_ids = [row[0] for row in rows]
+                    # Create placeholders dynamically
+                    placeholders = ', '.join(['?'] * len(row_ids))
+
+                    # SQL query for updating the pushed/not pushed marker
+                    update_query = """
+                        UPDATE logins
+                        SET pushed = 'Y'
+                        WHERE id IN ({})
+                    """.format(placeholders)
+
+                    cursor.execute(update_query, row_ids)
+                    conn.commit()
+
+                elif response.error: 
+                    print("Error pushing to Supabase:", response.error)
+                    
+            except Exception as e:
+                print("Error pushing to Supabase:", e)
+
+
+        # Get records from local db
+        cursor.execute("""
+            SELECT username, business_name, percentage FROM business_plans
+            WHERE username = ?
+        """, (self.username,))
+        rows = cursor.fetchall()
+
+        if not rows:
+            print("No records to push.")
+            conn.close()
+            return
+
+        # Prepare data for supabase
+        business_data_to_insert = [
+            {"p_username": row[0], "p_plan_name": row[1], "p_completion_percentage": row[2]}
+            for row in rows
+        ]
+
+        # Upsert to supabase (function defined in supabase because would not recognize unique constraint via python code)
+        try:
+            for data in business_data_to_insert:
+                response = self.supabase.rpc("upsert_plans", data).execute()
+
+        except Exception as e:
+            print("Error pushing to Supabase:", e)
+
+        finally:
+            conn.close()
+
     def logout(self):
-        """Logout of application"""
+        """Logout of application and update supabase"""
         if self.open_windows:  
             messagebox.showwarning("Warning", "Please close all open Business Plan windows before logging out.")
         else:
+            logout_timestamp = datetime.now().isoformat()
+            print(f"User {self.username} logged out at {logout_timestamp}")
+
+            # Update local db
+            conn = sqlite3.connect("thunder.db")
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO logins (username, login_timestamp, logout_timestamp, pushed)
+                VALUES (?, ?, ?, 'N')
+            """, (self.username, self.login_timestamp, logout_timestamp))
+            conn.commit()
+            conn.close()
+
+            # Push to supabase if app connected to internet
+            if self.is_online():
+                self.push_to_supabase()
+
             self.pack_forget()
             self.main_app.show_signin()
     

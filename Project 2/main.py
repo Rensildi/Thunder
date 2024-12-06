@@ -5,6 +5,7 @@ from SignUp import SignUp
 import threading
 import os
 import signal
+from supabase import *
 import onboarding_screen1
 import onboarding_screen2
 import onboarding_screen3
@@ -16,6 +17,10 @@ class MainApp:
         self.root = CTk()  # Create the main application window
         self.root.geometry("900x600")
         self.root.title("Thunder")
+
+        SUPA_URL = os.getenv("SUPABASE_URL")
+        SUPA_KEY = os.getenv("SUPABASE_KEY")
+        self.supabase = create_client(SUPA_URL, SUPA_KEY)
 
         initialize_db()
 

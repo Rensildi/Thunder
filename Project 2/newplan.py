@@ -1192,6 +1192,7 @@ class BusinessPlanForm(CTkToplevel):
         industry = self.industry_entry.get("1.0", "end").strip()
         employees = self.employees_entry.get("1.0", "end").strip()
         legal_structure = self.legal_structure_entry.get("1.0", "end").strip()
+        percentage = self.calculate_completion()
 
         # Executive Summary
         description = self.description_entry.get("1.0", "end").strip()
@@ -1273,6 +1274,7 @@ class BusinessPlanForm(CTkToplevel):
             "employees":employees,
             "legal_structure":legal_structure,
             "industry":industry,
+            "percentage":percentage,
 
             # Executive summary
             "description": description,
