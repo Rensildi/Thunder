@@ -12,6 +12,29 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from database import resource_path
 import os
+import smtplib
+from email.mime.text import MIMEText
+from random import randint
+
+SMTP_SETTINGS = {
+    'gmail.com': {
+        'server': 'smtp.gmail.com',
+        'port': 587,
+        'use_tls': True
+    },
+    'yahoo.com': {
+        'server': 'smtp.mail.yahoo.com',
+        'port': 587,
+        'use_tls': True
+    },
+    'outlook.com': {
+        'server': 'smtp-mail.outlook.com',
+        'port': 587,
+        'use_tls': True
+    },
+    # Add more email providers as needed
+}
+
 
 class SignIn(CTkFrame):
     def __init__(self, main_app):
@@ -220,31 +243,82 @@ class SignIn(CTkFrame):
             
             # Check if email exists and password matches
             if result:
-                username, hashed_password, sign_in_count = result  # Already a string now
-                if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):  # Convert string to bytes for comparison
-                    self.update_console("")  # Clear any previous error messages
-                    self.console_output.configure(text_color="green")  # Set text color to green for success message
+                username, hashed_password, sign_in_count = result
+                if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
+                    self.update_console("")
+                    self.console_output.configure(text_color="green")
                     self.update_console("You signed in successfully! Please wait a moment")
-                    #self.after(1000, self.show_dashboard, username)
                     
-                    if sign_in_count == 0:
-                        self.after(1000, self.show_onboarding, username, email)
-                    else:
-                        self.after(1000, self.show_dashboard, username)
+                    # Generate and send verification code
+                    verification_code = randint(100000, 999999)
+                    self.send_verification_code(email, verification_code)
+                    
+                    # Show verification window
+                    self.show_verification_window(username, email, verification_code, sign_in_count)
                 else:
                     self.update_console("Email or Password may be incorrect or they do not exist.")
-                    self.is_loading = False # Preventing loading animation if the sign in is incorrect
-                    self.canvas.delete("all") # Clear the loading animation
+                    self.is_loading = False
+                    self.canvas.delete("all")
             else:
                 self.update_console("Email or Password may be incorrect or they do not exist.")
-                self.is_loading = False # Preventing loading animation if the sign in is incorrect
-                self.canvas.delete("all") # Clear the loading animation
+                self.is_loading = False
+                self.canvas.delete("all")
         except Exception as e:
             self.update_console(f"An error occurred: {e}")
         finally:
             cursor.close()
             conn.close()
-        print("Sign In button clicked")  
+        print("Sign In button clicked")
+        
+    def show_verification_window(self, username, email, verification_code, sign_in_count):
+        self.verification_window = CTkToplevel(self)
+        self.verification_window.title("Verification")
+        
+        label = CTkLabel(self.verification_window, text="Enter the 6-digit code sent to your email")
+        label.pack(pady=10)
+        
+        self.verification_entry = CTkEntry(self.verification_window, width=200)
+        self.verification_entry.pack(pady=10)
+        
+        verify_button = CTkButton(self.verification_window, text="Verify", command=lambda: self.verify_code(username, email, verification_code, sign_in_count))
+        verify_button.pack(pady=10)
+    
+    def verify_code(self, username, email, verification_code, sign_in_count):
+        entered_code = self.verification_entry.get().strip()
+        if str(verification_code) == entered_code:
+            self.verification_window.destroy()
+            if sign_in_count == 0:
+                self.after(1000, self.show_onboarding, username, email)
+            else:
+                self.after(1000, self.show_dashboard, username)
+        else:
+            self.update_console("Invalid verification code. Please try again.")
+    
+    def send_verification_code(self, email, code):
+        domain = email.split('@')[-1]
+        smtp_settings = SMTP_SETTINGS.get(domain)
+        
+        if not smtp_settings:
+            self.update_console(f"Unsupported email domain: {domain}")
+            return
+        
+        msg = MIMEText(f"Your verification code is {code}")
+        msg['Subject'] = 'Your Verification Code'
+        msg['From'] = os.getenv('EMAIL_ADDRESS')
+        msg['To'] = email
+
+        try:
+            with smtplib.SMTP(smtp_settings['server'], smtp_settings['port']) as server:
+                server.set_debuglevel(1)  # Enable debug output
+                if smtp_settings['use_tls']:
+                    server.starttls()
+                server.login(os.getenv('EMAIL_ADDRESS'), os.getenv('EMAIL_PASSWORD'))
+                server.sendmail(os.getenv('EMAIL_ADDRESS'), email, msg.as_string())
+            self.update_console("Verification code sent to your email.")
+        except smtplib.SMTPException as e:
+            self.update_console(f"Failed to send verification code: {e}")
+        except Exception as e:
+            self.update_console(f"An unexpected error occurred: {e}")
     
     def show_onboarding(self, username, email):
         """Show the tutorial"""
